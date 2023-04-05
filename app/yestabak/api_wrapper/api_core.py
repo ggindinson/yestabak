@@ -11,6 +11,10 @@ class ApiWrapper:
         response = await self.__request("GET", self.BASE_URL + "/categories")
         return response
 
+    async def get_category_items(self, category_id: int):
+        response = await self.__request("GET", self.BASE_URL + f"/categories/{category_id}/items")
+        return response
+
     # ----------------------------------- PRIVATE METHODS ----------------------------------- #
     def __build_params(self, **params):
         valued_params = {}
@@ -20,7 +24,7 @@ class ApiWrapper:
                 valued_params[key] = value
         return valued_params
 
-    async def __request(self, method: Literal['GET', 'POST', 'DELETE'], url, **params):
+    async def __request(self, method: Literal['GET', 'POST', 'DELETE', 'PATCH'], url, **params):
         params = self.__build_params(**params)
         async with self.api_session() as session:
             async with session.request(method, url, **params) as response:
