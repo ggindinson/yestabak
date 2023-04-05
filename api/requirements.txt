@@ -1,0 +1,12 @@
+aiogram
+alembic
+asyncpg
+Flask
+itsdangerous
+jedi
+Jinja2
+psycopg
+psycopg-binary
+psycopg2
+psycopg2-binary
+SQLAlchemy
