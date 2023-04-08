@@ -31,6 +31,6 @@ async def single_category(call: CallbackQuery, state: FSMContext, api: ApiWrappe
 
     await call.message.answer_photo(
         FSInputFile("yestabak/assets/items.jpg"),
-        caption="<b>1. Выберите товар\n2.Добавьте в корзину</b>",
+        caption="<b>1. Выберите товар\n2. Добавьте в корзину</b>",
         reply_markup=items_kb(category_items),
     )

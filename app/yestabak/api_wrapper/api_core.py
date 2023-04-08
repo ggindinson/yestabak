@@ -7,6 +7,17 @@ class ApiWrapper:
         self.BASE_URL = "http://62.84.100.13/api/v1/"
         self.api_session = ClientSession
 
+    async def get_user_if_exists(self, user_id: int):
+        try:
+            response = await self.__request("GET", self.BASE_URL + f"/users/{user_id}")
+        except:
+            return None
+        return response
+
+    async def create_user(self, user_id: int, first_name: str, last_name: str, username: str, phone: str):
+        response = await self.__request("POST", self.BASE_URL + "/users", telegram_id=user_id, first_name=first_name, last_name=last_name, username=username, phone_number=phone)
+        return response
+
     async def get_categories(self):
         response = await self.__request("GET", self.BASE_URL + "/categories")
         return response
@@ -27,8 +38,9 @@ class ApiWrapper:
     async def __request(self, method: Literal['GET', 'POST', 'DELETE', 'PATCH'], url, **params):
         params = self.__build_params(**params)
         async with self.api_session() as session:
-            async with session.request(method, url, **params) as response:
+            async with session.request(method, url, params=params) as response:
                 json_data = await response.json()
                 if not json_data['ok']:
-                    raise Exception('error while recieving data from api')
+                    raise Exception(
+                        f'error while recieving data from api\n Response: {json_data}')
                 return json_data['data']
