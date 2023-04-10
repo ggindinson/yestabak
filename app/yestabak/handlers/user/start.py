@@ -14,11 +14,13 @@ from yestabak.states import RegState
 async def start_handler(message: Union[Message, CallbackQuery], state: FSMContext, api: ApiWrapper):
     await state.clear()
 
+    user_id = message.from_user.id
+
     if isinstance(message, CallbackQuery):
         message = message.message
         await message.delete()
 
-    user = await api.get_user_if_exists(message.from_user.id)
+    user = await api.get_user_if_exists(user_id)
     if not user:
         await state.set_state(RegState.get_first_name)
         sent_msg = await message.answer('<b><i>Регистрация (шаг 1/3)</i></b>\n\nПришлите свое имя')
