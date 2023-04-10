@@ -23,7 +23,7 @@ async def start_handler(message: Union[Message, CallbackQuery], state: FSMContex
     user = await api.get_user_if_exists(user_id)
     if not user:
         await state.set_state(RegState.get_first_name)
-        sent_msg = await message.answer('<b><i>Регистрация (шаг 1/3)</i></b>\n\nПришлите свое имя')
+        sent_msg = await message.answer('<b><i>Регистрация (шаг 1/3)</i></b>\n\n<b>Пришлите свое имя</b>')
         await state.update_data(msg=sent_msg)
         return
 
@@ -41,7 +41,7 @@ async def get_user_first_name(message: Message, state: FSMContext):
 
     msg = (await state.get_data())['msg']
     await message.delete()
-    await msg.edit_text('<b><i>Регистрация (шаг 2/3)</i></b>\n\nПришлите свою фамилию')
+    await msg.edit_text('<b><i>Регистрация (шаг 2/3)</i></b>\n\n<b>Пришлите свою фамилию</b>')
 
 
 @userRouter.message(StateFilter(RegState.get_last_name))
@@ -52,7 +52,7 @@ async def get_last_name(message: Message, state: FSMContext):
     msg = (await state.get_data())['msg']
     await message.delete()
     await msg.delete()
-    await message.answer('<b><i>Регистрация (шаг 3/3)</i></b>\n\nПришлите свой номер телефона', reply_markup=contact_kb())
+    await message.answer('<b><i>Регистрация (шаг 3/3)</i></b>\n\n<b>Пришлите свой номер телефона</b>', reply_markup=contact_kb())
 
 
 @userRouter.message(StateFilter(RegState.get_phone))
