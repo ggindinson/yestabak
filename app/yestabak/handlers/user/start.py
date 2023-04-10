@@ -3,10 +3,9 @@ from aiogram import F
 from aiogram.filters import StateFilter
 from aiogram.types import Message, FSInputFile, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from aiogram.enums.content_type import ContentType
 from yestabak.api_wrapper import ApiWrapper
 from yestabak.routes.user.router import userRouter
-from yestabak.keyboards import start_menu_kb
+from yestabak.keyboards import start_menu_kb, contact_kb
 from yestabak.states import RegState
 
 
@@ -50,18 +49,17 @@ async def get_last_name(message: Message, state: FSMContext):
 
     msg = (await state.get_data())['msg']
     await message.delete()
-    await msg.edit_text('<b><i>Регистрация (шаг 3/3)</i></b>\n\nПришлите свой номер телефона')
+    await msg.delete()
+    await message.answer('<b><i>Регистрация (шаг 3/3)</i></b>\n\nПришлите свой номер телефона', reply_markup=contact_kb())
 
 
 @userRouter.message(StateFilter(RegState.get_phone))
-# @userRouter.message(ContentType.CONTACT)
 async def get_phone(message: Message, state: FSMContext, api: ApiWrapper):
     data = await state.get_data()
-    msg = data['msg']
     del data['msg']
-    await api.create_user(phone=message.text, user_id=message.from_user.id, username=message.from_user.username, **data)
+    await message.edit_reply_markup(reply_markup=None)
+    await api.create_user(phone=message.contact.phone_number or message.text, user_id=message.from_user.id, username=message.from_user.username, **data)
 
     await state.clear()
-    await msg.delete()
     await message.delete()
     await start_handler(message, state, api)
