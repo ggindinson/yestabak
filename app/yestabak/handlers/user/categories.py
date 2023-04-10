@@ -25,7 +25,7 @@ async def categories_menu(call: CallbackQuery, state: FSMContext, api: ApiWrappe
 async def single_category(call: CallbackQuery, state: FSMContext, api: ApiWrapper):
     await state.clear()
     await call.message.delete()
-    category_id = int(call.data.split('_')[1])
+    category_id = int(call.data.split("_")[1])
 
     category_items = await api.get_category_items(category_id)
 

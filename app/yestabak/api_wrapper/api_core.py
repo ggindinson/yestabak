@@ -1,5 +1,7 @@
 from typing import Literal
 from aiohttp import ClientSession
+from .api_classes import UserDataResponse
+from dacite import from_dict
 
 
 class ApiWrapper:
@@ -7,12 +9,12 @@ class ApiWrapper:
         self.BASE_URL = "http://62.84.100.13/api/v1/"
         self.api_session = ClientSession
 
-    async def get_user_if_exists(self, user_id: int):
+    async def get_user_if_exists(self, user_id: int) -> UserDataResponse:
         try:
             response = await self.__request("GET", self.BASE_URL + f"/users/{user_id}")
         except:
             return None
-        return response
+        return from_dict(UserDataResponse, response)
 
     async def create_user(self, user_id: int, first_name: str, last_name: str, username: str, phone: str):
         response = await self.__request("POST", self.BASE_URL + "/users", telegram_id=user_id, first_name=first_name, last_name=last_name, username=username, phone_number=phone)

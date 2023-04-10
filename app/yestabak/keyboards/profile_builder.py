@@ -6,11 +6,9 @@ def profile_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     kb_data = [
-        ['Мой баланс', 'my_balance'],
-        ['Мои заказы', 'my_orders'],
-        ['Мои адреса', 'my_addresses'],
-        ['Мои способы оплаты', 'my_payment_methods'],
-        ['⬅️ Вернуться в меню', 'main_menu'],
+        ["Мои адреса", "my_addresses"],
+        ["Мои покупки", "my_orders"],
+        ["⬅️ Вернуться в меню", "main_menu"],
     ]
 
     for button_data in kb_data:
