@@ -4,9 +4,9 @@ import sys
 from aiogram import Dispatcher, Bot
 from aiogram.fsm.storage.memory import MemoryStorage as ms
 from yestabak.api_wrapper import ApiWrapper
-from yestabak.routes import userRouter
+from yestabak.routes import routes
 from yestabak.configs import BOT_TOKEN
-from yestabak.helpers import render_text
+from yestabak.utils import render_text
 
 
 # main function to run
@@ -32,7 +32,8 @@ async def main():
         await bot.delete_webhook(drop_pending_updates=True)
 
         # Initialize routers and attach it to main Router/Dispatcher
-        dp.include_router(userRouter)
+        for router in routes:
+            dp.include_router(router)
 
         # Initialize api wrapper
         api = ApiWrapper()

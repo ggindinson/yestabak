@@ -1,4 +1,5 @@
 from .start import *
 from .categories import *
+from .cart import *
 from .profile import *
-from .start import *
+from .items import *

@@ -15,6 +15,15 @@ class User:
 
 
 @dataclass
+class CartItem:
+    id: int
+    item_id: int
+    quantity: int
+    telegram_id: int
+
+
+@dataclass
 class UserDataResponse:
     addresses: List[str]
     user: User
+    cart: List[CartItem]
