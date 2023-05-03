@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from yestabak.routes import userRouter
-from yestabak.keyboards import cart_kb
+from yestabak.keyboards import items_kb
 from yestabak.api_wrapper import ApiWrapper
 
 
@@ -18,5 +18,5 @@ async def my_cart(call: CallbackQuery, state: FSMContext, api: ApiWrapper):
             media=FSInputFile("yestabak/assets/cart.jpg"),
             caption="<b>1) Выберите товар\n2) Внесите изменения</b>",
         ),
-        reply_markup=cart_kb(user_cart),
+        reply_markup=items_kb(user_cart, user_cart),
     )

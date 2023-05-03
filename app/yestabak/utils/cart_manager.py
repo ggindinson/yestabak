@@ -3,30 +3,30 @@ from typing import List, Literal, Dict, Any
 
 def check_item_in_list(item_id, items_list: List[Dict[int, int]]):
     for item in items_list:
-        if item["item_id"] == item_id:
+        if item["id"] == item_id:
             return True
     return False
 
 
 def decrease_item(item_id, items_list: List[Dict[int, int]]):
     if not check_item_in_list(item_id, items_list):
-        cart = list(filter(lambda item: item["item_id"] != item_id, items_list))
+        cart = list(filter(lambda item: item["id"] != item_id, items_list))
         return cart
 
     for item in items_list:
-        if item["item_id"] == item_id:
+        if item["id"] == item_id:
             if item["quantity"] == 1:
-                return list(filter(lambda item: item["item_id"] != item_id, items_list))
+                return list(filter(lambda item: item["id"] != item_id, items_list))
             item["quantity"] -= 1
             return items_list
 
 
 def increase_item(item_id, items_list: List[Dict[int, int]]):
     if not check_item_in_list(item_id, items_list):
-        items_list.append({"item_id": item_id, "quantity": 1})
+        items_list.append({"id": item_id, "quantity": 1})
     else:
         for item in items_list:
-            if item["item_id"] == item_id:
+            if item["id"] == item_id:
                 item["quantity"] += 1
     return items_list
 
@@ -56,7 +56,7 @@ def cart_dispatch(
             return cart
 
         case ("delete", item_id):
-            cart = list(filter(lambda item: item["item_id"] != item_id, cart))
+            cart = list(filter(lambda item: item["id"] != item_id, cart))
 
             return cart
 

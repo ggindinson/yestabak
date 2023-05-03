@@ -1,7 +1,8 @@
 from aiogram import BaseMiddleware
-from typing import Callable, Dict, Any, Awaitable
 from aiogram.types import TelegramObject, CallbackQuery
 from aiogram.fsm.context import FSMContext
+from typing import Callable, Dict, Any, Awaitable
+
 from yestabak.api_wrapper import ApiWrapper
 
 
@@ -12,12 +13,15 @@ class TransferCartDataMiddleware(BaseMiddleware):
         call: CallbackQuery,
         data: Dict[str, Any],
     ) -> Any:
-        if "item" not in call.data:
-            state: FSMContext = data["state"]
-            api: ApiWrapper = data["api"]
-            current_state = await state.get_state()
-            if current_state and current_state == "CategoryState:menu":
-                cart = (await state.get_data())["cart"]
-                if len(cart):
-                    await api.post_cart(user_id=call.from_user.id, cart=cart)
+        state: FSMContext = data["state"]
+        api: ApiWrapper = data["api"]
+        current_state = await state.get_state()
+        if "item" in call.data or current_state != "CategoryState:menu":
+            return await handler(call, data)
+        cart = (await state.get_data())["cart"]
+
+        for row in cart:
+            row["item_id"] = row.pop("id")
+
+        await api.post_cart(user_id=call.from_user.id, cart=cart)
         return await handler(call, data)

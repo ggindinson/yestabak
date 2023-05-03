@@ -6,8 +6,6 @@ from aiogram.types import InlineKeyboardMarkup
 def cart_kb(items) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    print(items)
-
     kb_data = [
         ["Мои адреса", "my_addresses"],
         ["Мои покупки", "my_orders"],

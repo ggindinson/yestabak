@@ -14,7 +14,7 @@ def check_id_in_cart(
     id_to_check: int, items: List[SelectedItem]
 ) -> Tuple[bool, SelectedItem]:
     for item in items:
-        if item["item_id"] == id_to_check and item["quantity"]:
+        if item["id"] == id_to_check and item["quantity"]:
             return True, item
     return False, None
 
