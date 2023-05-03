@@ -1,4 +1,4 @@
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal
 from aiohttp import ClientSession
 from .api_classes import UserDataResponse, CartItem
 from dacite import from_dict
@@ -48,13 +48,15 @@ class ApiWrapper:
     async def get_user_cart(self, user_id: int) -> List[CartItem]:
         response = await self.__request(
             "GET",
-            self.BASE_URL + f"/users/{user_id}/cart",
+            self.BASE_URL + f"/users/{user_id}/cart_items",
         )
         return response
 
     async def post_cart(self, user_id: int, cart: List[Dict[int, int]]):
         response = await self.__request(
-            "POST", self.BASE_URL + f"/users/{user_id}/cart/", data={"items": cart}
+            "POST",
+            self.BASE_URL + f"/users/{user_id}/cart_items/",
+            data={"items": cart},
         )
         return response
 
@@ -76,8 +78,8 @@ class ApiWrapper:
                 method, url, params=params, json=data
             ) as response:
                 json_data = await response.json()
-                if not json_data["ok"]:
+                if not json_data.get("ok", True):
                     raise Exception(
                         f"error while recieving data from api\n Response: {json_data}"
                     )
-                return json_data["data"]
+                return json_data.get("data")

@@ -17,13 +17,18 @@ class User:
 @dataclass
 class CartItem:
     id: int
-    item_id: int
+    category_id: int
+    created_at: str
+    last_updated_at: str
+    currency: str
+    description: str
+    price: int
+    photo: str
     quantity: int
-    telegram_id: int
 
 
 @dataclass
 class UserDataResponse:
-    addresses: List[str]
+    addresses: List[Optional[str]]
     user: User
-    cart: List[CartItem]
+    cart_items: List[CartItem]
