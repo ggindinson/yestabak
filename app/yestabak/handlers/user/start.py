@@ -5,11 +5,9 @@ from aiogram.types import (
     Message,
     FSInputFile,
     CallbackQuery,
-    ForceReply,
     InputMediaPhoto,
     ReplyKeyboardRemove,
 )
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from yestabak.api_wrapper import ApiWrapper
 from yestabak.routes.user.router import userRouter
@@ -23,25 +21,20 @@ async def start_handler(
     message: Union[Message, CallbackQuery], state: FSMContext, api: ApiWrapper
 ):
     await state.clear()
-
-    user_id = message.from_user.id
-
     if isinstance(message, CallbackQuery):
         message = message.message
+    else:
+        user = await api.get_user_if_exists(message.from_user.id)
 
-    user = await api.get_user_if_exists(user_id)
-    if not user:
-        await state.set_state(RegState.get_first_name)
-        sent_msg = await message.answer(
-            "<b><i>Регистрация (шаг 1/3)</i></b>\n\n<b>Пришлите свое имя</b>",
-            reply_markup=ForceReply(
-                force_reply=True, input_field_placeholder="Введите имя..."
-            ),
-        )
-        await state.update_data(msg=sent_msg)
-        return
+        if not user:
+            await state.set_state(RegState.get_first_name)
+            msg = await message.answer(
+                "<b><i>Регистрация (шаг 1/3)</i></b>\n\n<b>Пришлите свое имя</b>",
+            )
+            await state.update_data(msg=msg)
+            return
 
-    try:
+    if message.photo:
         await message.edit_media(
             InputMediaPhoto(
                 media=FSInputFile("yestabak/assets/menu.jpg"),
@@ -49,7 +42,7 @@ async def start_handler(
             ),
             reply_markup=start_menu_kb(),
         )
-    except TelegramBadRequest:
+    else:
         await message.answer_photo(
             photo=FSInputFile("yestabak/assets/menu.jpg"),
             caption="<b>Добро пожаловать!</b>",
@@ -62,16 +55,11 @@ async def get_user_first_name(message: Message, state: FSMContext):
     await state.update_data(first_name=message.text)
     await state.set_state(RegState.get_last_name)
 
-    msg = (await state.get_data())["msg"]
+    msg: Message = (await state.get_data())["msg"]
     await message.delete()
-    await msg.delete()
-    msg = await message.answer(
+    await msg.edit_text(
         "<b><i>Регистрация (шаг 2/3)</i></b>\n\n<b>Пришлите свою фамилию</b>",
-        reply_markup=ForceReply(
-            force_reply=True, input_field_placeholder="Введите фамилию..."
-        ),
     )
-    await state.update_data(msg=msg)
 
 
 @userRouter.message(StateFilter(RegState.get_last_name))
@@ -79,13 +67,15 @@ async def get_last_name(message: Message, state: FSMContext):
     await state.update_data(last_name=message.text)
     await state.set_state(RegState.get_phone)
 
-    msg = (await state.get_data())["msg"]
+    msg: Message = (await state.get_data())["msg"]
     await message.delete()
     await msg.delete()
+
     msg = await message.answer(
         "<b><i>Регистрация (шаг 3/3)</i>\n\nПришлите свой номер телефона</b>",
         reply_markup=contact_kb(),
     )
+
     await state.update_data(msg=msg)
 
 
@@ -94,9 +84,10 @@ async def get_phone(message: Message, state: FSMContext, api: ApiWrapper):
     data = await state.get_data()
     msg: Message = data["msg"]
     del data["msg"]
+
     await api.create_user(
-        phone=message.text or message.contact.phone_number,
-        user_id=message.from_user.id,
+        phone_number=message.text or message.contact.phone_number,
+        telegram_id=message.from_user.id,
         username=message.from_user.username,
         **data
     )

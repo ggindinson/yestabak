@@ -19,6 +19,19 @@ def check_id_in_cart(
     return False, None
 
 
+def admin_items_kb(items, category_id: int):
+    builder = InlineKeyboardBuilder()
+    for item in items:
+        builder.button(text=item["name"], callback_data=f"item_settings_{item['id']}")
+    builder.button(text="✒ Создать товар", callback_data="create_item")
+    builder.button(
+        text="⚠ Удалить категорию", callback_data=f"delete_category_{category_id}"
+    )
+    builder.button(text="🔙 К категориям", callback_data="admin")
+    builder.adjust(1)
+    return builder.as_markup()
+
+
 def items_kb(items, selected_items: List[SelectedItem]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     is_cart_filled = False

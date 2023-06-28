@@ -16,7 +16,10 @@ class TransferCartDataMiddleware(BaseMiddleware):
         state: FSMContext = data["state"]
         api: ApiWrapper = data["api"]
         current_state = await state.get_state()
-        if "item" in call.data or current_state != "CategoryState:menu":
+        if "item" in call.data or current_state not in [
+            "CategoryState:menu",
+            "CartState:cart",
+        ]:
             return await handler(call, data)
         cart = (await state.get_data())["cart"]
 

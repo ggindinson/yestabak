@@ -1,18 +1,22 @@
-from typing import Dict
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup
 
 
 def cart_kb(items) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-
-    kb_data = [
-        ["Мои адреса", "my_addresses"],
-        ["Мои покупки", "my_orders"],
-        ["⬅️ Вернуться в меню", "main_menu"],
-    ]
-
-    for button_data in kb_data:
-        builder.button(text=button_data[0], callback_data=button_data[1])
+    for item in items:
+        name = item["name"]
+        builder.button(
+            text=f"{name} ({item['quantity']} шт.)",
+            callback_data=f"category_{item['category_id']}",
+        )
+        builder.button(
+            text=f"🗑️ Убрать {name} из корзины",
+            callback_data=f"delete_cartitem_{item['id']}",
+        )
+    builder.button(text="💳 Перейти к оплате", callback_data="payment_start") if len(
+        items
+    ) else builder.button(text="➡️ К категориям", callback_data="all_categories")
+    builder.button(text="❌ Закрыть корзину", callback_data="main_menu")
     builder.adjust(1)
     return builder.as_markup()

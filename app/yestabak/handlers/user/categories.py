@@ -23,7 +23,7 @@ async def categories_menu(call: CallbackQuery, state: FSMContext, api: ApiWrappe
     )
 
 
-@userRouter.callback_query(F.data.contains("category"), StateFilter("*"))
+@userRouter.callback_query(F.data.startswith("category"), StateFilter("*"))
 async def single_category(call: CallbackQuery, state: FSMContext, api: ApiWrapper):
     category_id = int(call.data.split("_")[1])
     category_items = await api.get_category_items(category_id)

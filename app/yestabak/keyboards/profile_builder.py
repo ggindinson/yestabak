@@ -7,7 +7,6 @@ def profile_kb() -> InlineKeyboardMarkup:
 
     kb_data = [
         ["Мои адреса", "my_addresses"],
-        ["Мои покупки", "my_orders"],
         ["⬅️ Вернуться в меню", "main_menu"],
     ]
 

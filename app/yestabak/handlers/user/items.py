@@ -20,6 +20,23 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
             item_clicked = item
             break
 
+    for item in current_cart:
+        item_in_cart = None
+        if item["id"] == int(item_id):
+            item_in_cart = item
+            break
+
+    if (
+        event_type == "increase"
+        and len(current_cart)
+        and item_in_cart
+        and item_in_cart["quantity"] > 19
+    ):
+        await call.answer(
+            "Вы не можете добавить больше 20 единиц одного товара!", show_alert=True
+        )
+        return
+
     cart = cart_dispatch(
         int(item_id),
         event_type,
@@ -28,19 +45,18 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
     await state.update_data(cart=cart)
 
     if event_type == "increase" and int(item_id) != current_item_info_id:
-        await call.message.edit_caption(
-            caption=f"""Выбранный товар: {item_clicked["name"]}
+        caption = f"""Выбранный товар: {item_clicked["name"]}
 Описание: {item_clicked["description"]}
 Цена: {item_clicked["price"]}"""
-        )
 
-        if "https" in item_clicked["photo"]:
-            await call.message.edit_media(
-                InputMediaPhoto(media=URLInputFile(url=item_clicked["photo"]))
+        await call.message.edit_media(
+            InputMediaPhoto(
+                media=URLInputFile(url=item_clicked["photo"])
+                if "https" in item_clicked["photo"]
+                else InputMediaPhoto(media=item_clicked["photo"]),
+                caption=caption,
             )
-        else:
-            await call.message.edit_media(InputMediaPhoto(media=item_clicked["photo"]))
-
+        )
         await state.update_data(current_item_info_id=int(item_id))
 
     if (event_type == "decrease" or event_type == "delete") and not len(cart):
@@ -50,5 +66,6 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
                 caption="<b>1. Выберите товар\n2. Добавьте в корзину</b>",
             ),
         )
+        await state.update_data(current_item_info_id=0)
 
     await call.message.edit_reply_markup(reply_markup=items_kb(items, cart))
