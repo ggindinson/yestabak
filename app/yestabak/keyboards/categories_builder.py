@@ -13,7 +13,7 @@ def categories_kb(categories: list, is_admin_menu=False) -> InlineKeyboardMarkup
     if is_admin_menu:
         builder.row(
             InlineKeyboardButton(
-                text="✒ Создать категорию", callback_data="new_category"
+                text="✒ Создать категорию", callback_data="create_category"
             )
         )
     builder.row(

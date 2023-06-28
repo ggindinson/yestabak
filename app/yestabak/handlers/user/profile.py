@@ -93,11 +93,11 @@ async def address_additional_info(call: CallbackQuery, state: FSMContext):
     address_id = int(call.data.split("_")[-1])
     all_addresses = (await state.get_data())["addresses"]
     current_address = list(
-        filter(lambda address: address["id"] == address_id, all_addresses)
-    )
+        filter(lambda address: address.id == address_id, all_addresses)
+    )[0]
 
     await call.message.edit_caption(
-        caption=f"Название адреса: {current_address['name']}\n\nПолный адрес: <i><b>{current_address['address']}</b></i>",
+        caption=f"Название адреса: {current_address.data['name']}\n\nПолный адрес: <i><b>{current_address.data['address']}</b></i>",
         reply_markup=edit_address_kb(address_id),
     )
 
@@ -144,8 +144,7 @@ async def address_data_handler(
     message_id = (await state.get_data())["message_id"]
     await api.create_user_address(
         address={
-            "name": data["name"],
-            "data": {"address": message.text},
+            "data": {"address": message.text, "name": data["name"]},
             "telegram_id": message.from_user.id,
         },
     )

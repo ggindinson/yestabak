@@ -7,7 +7,7 @@ from yestabak.utils import cart_dispatch
 from yestabak.keyboards import items_kb
 
 
-@userRouter.callback_query(F.data.contains("item"), StateFilter("*"))
+@userRouter.callback_query(F.data.startswith("item"), StateFilter("*"))
 async def handle_item_click(call: CallbackQuery, state: FSMContext):
     _, item_id, event_type = call.data.split("_")
     state_data = await state.get_data()

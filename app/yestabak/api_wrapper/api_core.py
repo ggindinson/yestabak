@@ -1,6 +1,6 @@
 from typing import Dict, List, Literal
 from aiohttp import ClientSession
-from .api_classes import UserDataResponse, CartItem
+from .api_classes import Item, UserDataResponse, CartItem
 from dacite import from_dict
 
 
@@ -45,6 +45,25 @@ class ApiWrapper:
     async def get_category_items(self, category_id: int):
         response = await self.__request(
             "GET", self.BASE_URL + f"/categories/{category_id}/items"
+        )
+        return response
+
+    async def get_item_by_id(self, item_id: int) -> Item:
+        response = await self.__request("GET", self.BASE_URL + f"/items/{item_id}")
+        return response
+
+    async def create_category(self, name: str):
+        response = await self.__request(
+            "POST",
+            self.BASE_URL + "/categories",
+            data={"name": name},
+        )
+        return response
+
+    async def delete_category(self, category_id: int):
+        response = await self.__request(
+            "DELETE",
+            self.BASE_URL + f"/categories/{category_id}",
         )
         return response
 

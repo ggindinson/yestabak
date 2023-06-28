@@ -4,9 +4,8 @@ from typing import Any, Dict, List, Optional
 
 @dataclass
 class Address:
-    id: int | None
-    address: str
-    data: Dict[Any, Any] | None
+    data: Dict[str, str | int] | None
+    id: int
 
 
 @dataclass
@@ -20,6 +19,18 @@ class CartItem:
     price: int
     photo: str
     quantity: int
+
+
+@dataclass
+class Item:
+    id: int
+    category_id: int
+    created_at: str
+    last_updated_at: str
+    currency: str
+    description: str
+    price: int
+    photo: str
 
 
 @dataclass

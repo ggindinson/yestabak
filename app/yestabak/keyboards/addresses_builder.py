@@ -13,7 +13,7 @@ def addresses_kb(addresses: List[Address]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for address in addresses:
         builder.button(
-            text=format_address(address.address),
+            text=format_address(address.data["name"]),
             callback_data=f"address_additional_{address.id}",
         )
     builder.button(text="Добавить новый адрес", callback_data="add_address")

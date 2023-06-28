@@ -1,3 +1,3 @@
-from yestabak.routes import userRouter
+from yestabak.routes import userRouter, staffRouter
 
-routes = [userRouter]
+routes = [userRouter, staffRouter]
