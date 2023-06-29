@@ -43,6 +43,12 @@ def admin_back_kb():
     return builder.as_markup()
 
 
+def admin_cancel_kb():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⚠ Отменить", callback_data="admin")
+    return builder.as_markup()
+
+
 def admin_item_settings_kb(item: dict, category_id: int):
     builder = InlineKeyboardBuilder()
     builder.button(

@@ -7,6 +7,7 @@ from yestabak.keyboards.items_builder import (
     admin_item_settings_kb,
     admin_back_kb,
     admin_items_kb,
+    admin_cancel_kb,
 )
 from yestabak.routes import staffRouter
 from yestabak.api_wrapper import ApiWrapper
@@ -94,3 +95,77 @@ async def send_category_data(message: Message, api: ApiWrapper, state: FSMContex
     await api.create_category(message.text)
     await message.delete()
     await msg.edit_text("✅ Категория успешно добавлена", reply_markup=admin_back_kb())
+
+
+@staffRouter.callback_query(F.data.startswith("delete_item"))
+async def delete_item(call: CallbackQuery, api: ApiWrapper):
+    item_id = call.data.split("_")[-1]
+    await api.delete_item(item_id)
+    await call.message.delete()
+    await call.message.answer("✅ Товар успешно удален", reply_markup=admin_back_kb())
+
+
+@staffRouter.callback_query(F.data == "create_item")
+async def create_item(call: CallbackQuery, state: FSMContext):
+    await state.set_state(AdminState.get_item_name)
+    msg = await call.message.edit_text(
+        "Пришлите имя товара", reply_markup=admin_cancel_kb()
+    )
+    await state.update_data(msg=msg)
+
+
+@staffRouter.message(StateFilter(AdminState.get_item_name))
+async def proceed_item_name(message: Message, state: FSMContext):
+    msg = (await state.get_data())["msg"]
+    await state.set_state(AdminState.get_item_photo)
+
+    await message.delete()
+    await msg.edit_text(
+        "Пришлите фотографию товара ссылкой, либо отправьте изображение",
+        reply_markup=admin_cancel_kb(),
+    )
+    await state.update_data(msg=msg, name=message.text)
+
+
+@staffRouter.message(StateFilter(AdminState.get_item_photo))
+async def proceed_item_photo(message: Message, state: FSMContext):
+    msg = (await state.get_data())["msg"]
+    await state.set_state(AdminState.get_item_description)
+
+    await message.delete()
+    await msg.edit_text(
+        "Пришлите описание товара",
+        reply_markup=admin_cancel_kb(),
+    )
+    await state.update_data(
+        msg=msg, photo=message.text if message.text else message.photo[-1].file_id
+    )
+
+
+@staffRouter.message(StateFilter(AdminState.get_item_description))
+async def proceed_item_description(message: Message, state: FSMContext):
+    msg = (await state.get_data())["msg"]
+    await state.set_state(AdminState.get_item_price)
+
+    await message.delete()
+    await msg.edit_text(
+        "Пришлите цену товара",
+        reply_markup=admin_cancel_kb(),
+    )
+    await state.update_data(msg=msg, description=message.text)
+
+
+@staffRouter.message(StateFilter(AdminState.get_item_price))
+async def proceed_item_price(message: Message, state: FSMContext, api: ApiWrapper):
+    try:
+        price = int(message.text)
+    except ValueError:
+        await message.answer("Пришлите число")
+
+    data = await state.get_data()
+    msg = data["msg"]
+
+    await message.delete()
+    await api.create_item(**data, price=price)
+    await state.update_data(msg=msg, desctiption=message.text)
+    await msg.edit_text("✅ Товар успешно добавлен", reply_markup=admin_back_kb())

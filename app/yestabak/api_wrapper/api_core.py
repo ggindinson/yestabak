@@ -48,10 +48,6 @@ class ApiWrapper:
         )
         return response
 
-    async def get_item_by_id(self, item_id: int) -> Item:
-        response = await self.__request("GET", self.BASE_URL + f"/items/{item_id}")
-        return response
-
     async def create_category(self, name: str):
         response = await self.__request(
             "POST",
@@ -64,6 +60,21 @@ class ApiWrapper:
         response = await self.__request(
             "DELETE",
             self.BASE_URL + f"/categories/{category_id}",
+        )
+        return response
+
+    # Items
+    async def get_item_by_id(self, item_id: int) -> Item:
+        response = await self.__request("GET", self.BASE_URL + f"/items/{item_id}")
+        return response
+
+    async def delete_item(self, item_id: int):
+        response = await self.__request("DELETE", self.BASE_URL + f"items/{item_id}")
+        return response
+
+    async def create_item(self, name: str, description: str, photo: str, price: int):
+        response = await self.__request(
+            "POST", self.BASE_URL + f"items/", data={name, description, photo, price}
         )
         return response
 

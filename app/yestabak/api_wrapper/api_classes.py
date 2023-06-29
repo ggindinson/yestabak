@@ -24,6 +24,7 @@ class CartItem:
 @dataclass
 class Item:
     id: int
+    name: str
     category_id: int
     created_at: str
     last_updated_at: str
