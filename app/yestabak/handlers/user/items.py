@@ -53,7 +53,7 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
             InputMediaPhoto(
                 media=URLInputFile(url=item_clicked["photo"])
                 if "https" in item_clicked["photo"]
-                else InputMediaPhoto(media=item_clicked["photo"]),
+                else item_clicked["photo"],
                 caption=caption,
             )
         )

@@ -28,7 +28,7 @@ def admin_items_kb(items, category_id: int):
             text=item["name"],
             callback_data=f"admin_item_settings_{item['id']}_{category_id}",
         )
-    builder.button(text="✒ Создать товар", callback_data="create_item")
+    builder.button(text="✒ Создать товар", callback_data=f"create_item_{category_id}")
     builder.button(
         text="⚠ Удалить категорию", callback_data=f"delete_category_{category_id}"
     )
@@ -52,14 +52,17 @@ def admin_cancel_kb():
 def admin_item_settings_kb(item: dict, category_id: int):
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="Изменить фото", callback_data=f"update_item_photo_{item['id']}"
-    )
-    builder.button(text="Изменить имя", callback_data=f"update_item_name_{item['id']}")
-    builder.button(
-        text="Изменить описание", callback_data=f"update_item_description_{item['id']}"
+        text="Изменить фото", callback_data=f"admin_update_item_photo_{item['id']}"
     )
     builder.button(
-        text="Изменить цену", callback_data=f"update_item_price_{item['id']}"
+        text="Изменить имя", callback_data=f"admin_update_item_name_{item['id']}"
+    )
+    builder.button(
+        text="Изменить описание",
+        callback_data=f"admin_update_item_description_{item['id']}",
+    )
+    builder.button(
+        text="Изменить цену", callback_data=f"admin_update_item_price_{item['id']}"
     )
     builder.button(text="⚠ Удалить товар", callback_data=f"delete_item_{item['id']}")
     builder.button(text="🔙 В категорию", callback_data=f"admin_category_{category_id}")

@@ -65,8 +65,8 @@ async def admin_item_settings(call: CallbackQuery, api: ApiWrapper):
     await call.message.answer_photo(
         photo=URLInputFile(url=item["photo"])
         if "https" in item["photo"]
-        else InputMediaPhoto(media=item["photo"]),
-        caption="Здесь вы можете отредактировать/удалить товар",
+        else item["photo"],
+        caption=f"Здесь вы можете отредактировать/удалить товар\n\n{item['name']}\nОписание: {item['description']}\nЦена: {item['price']}",
         reply_markup=admin_item_settings_kb(item, category_id),
     )
 
@@ -105,13 +105,14 @@ async def delete_item(call: CallbackQuery, api: ApiWrapper):
     await call.message.answer("✅ Товар успешно удален", reply_markup=admin_back_kb())
 
 
-@staffRouter.callback_query(F.data == "create_item")
+@staffRouter.callback_query(F.data.startswith("create_item"))
 async def create_item(call: CallbackQuery, state: FSMContext):
+    category_id = int(call.data.split("_")[-1])
     await state.set_state(AdminState.get_item_name)
     msg = await call.message.edit_text(
         "Пришлите имя товара", reply_markup=admin_cancel_kb()
     )
-    await state.update_data(msg=msg)
+    await state.update_data(msg=msg, category_id=category_id)
 
 
 @staffRouter.message(StateFilter(AdminState.get_item_name))
@@ -164,8 +165,41 @@ async def proceed_item_price(message: Message, state: FSMContext, api: ApiWrappe
 
     data = await state.get_data()
     msg = data["msg"]
+    del data["msg"]
 
     await message.delete()
     await api.create_item(**data, price=price)
-    await state.update_data(msg=msg, desctiption=message.text)
+    await state.clear()
     await msg.edit_text("✅ Товар успешно добавлен", reply_markup=admin_back_kb())
+
+
+@staffRouter.callback_query(F.data.startswith("admin_update_item"))
+async def update_item_manager(call: CallbackQuery, state: FSMContext):
+    item_id = int(call.data.split("_")[-1])
+    update_type = call.data.split("_")[-2]
+    await state.set_state(AdminState.get_update_data)
+    await state.update_data(msg=call.message, item_id=item_id, update_type=update_type)
+    await call.message.answer("Пришлите новые данные")
+
+
+@staffRouter.message(StateFilter(AdminState.get_update_data))
+async def update_item_data(message: Message, state: FSMContext, api: ApiWrapper):
+    data = await state.get_data()
+    msg = data["msg"]
+    item_id = data["item_id"]
+    update_type = data["update_type"]
+
+    data = (
+        message.photo[-1].file_id
+        if message.photo
+        else (int(message.text) if update_type == "price" else message.text)
+    )
+
+    await message.delete()
+
+    await api.update_item(item_id=item_id, update_type=update_type, data=data)
+
+    await msg.delete()
+    await message.answer("✅ Товар успешно обновлен", reply_markup=admin_back_kb())
+
+    await state.clear()

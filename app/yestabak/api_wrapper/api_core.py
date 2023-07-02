@@ -69,14 +69,29 @@ class ApiWrapper:
         return response
 
     async def delete_item(self, item_id: int):
-        response = await self.__request("DELETE", self.BASE_URL + f"items/{item_id}")
+        response = await self.__request("DELETE", self.BASE_URL + f"/items/{item_id}")
         return response
 
-    async def create_item(self, name: str, description: str, photo: str, price: int):
+    async def create_item(
+        self, name: str, description: str, photo: str, price: int, category_id: int
+    ):
         response = await self.__request(
-            "POST", self.BASE_URL + f"items/", data={name, description, photo, price}
+            "POST",
+            self.BASE_URL + f"/items/",
+            data={
+                "name": name,
+                "description": description,
+                "photo": photo,
+                "price": price,
+                "category_id": category_id,
+            },
         )
         return response
+
+    async def update_item(self, item_id: int, update_type: str, data: int | str):
+        response = await self.__request(
+            "PATCH", self.BASE_URL + f"/items/{item_id}", data={update_type: data}
+        )
 
     # Cart
     async def get_user_cart(self, user_id: int) -> List[CartItem]:
@@ -131,6 +146,7 @@ class ApiWrapper:
                 method, url, params=params, json=data
             ) as response:
                 json_data = await response.json()
+                print(url, data, json_data)
                 if not json_data.get("ok", True):
                     raise Exception(
                         f"error while recieving data from api\n Response: {json_data}"
