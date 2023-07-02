@@ -14,6 +14,7 @@ def delete_category(
 
         session.delete(category)
         session.commit()
+        session.close()
 
         return (True, id)
     except Exception as err:

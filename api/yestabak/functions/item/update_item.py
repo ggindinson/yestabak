@@ -14,6 +14,7 @@ def update_item(
         session.commit()
 
         item = session.query(Item).filter(Item.id == int(id)).first()
+        session.close()
 
         if not item:
             return (None, f"<Item id:{id}> doesn't exist!")

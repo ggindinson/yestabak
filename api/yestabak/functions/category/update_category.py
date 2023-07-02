@@ -14,6 +14,7 @@ def update_category(
         session.commit()
 
         category = session.query(Category).filter(Category.id == int(id)).first()
+        session.close()
 
         if not category:
             return (None, f"<Category id:{id}> doesn't exist!")

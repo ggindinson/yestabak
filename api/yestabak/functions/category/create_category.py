@@ -12,6 +12,7 @@ def create_category(session: Session, name: str) -> Tuple[bool, Union[Category, 
         category = (
             session.query(Category).filter(Category.id == int(category.id)).first()
         )
+        session.close()
         return (True, category)
     except Exception as err:
         session.rollback()

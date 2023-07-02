@@ -1,9 +1,9 @@
 from werkzeug.exceptions import HTTPException
 from sqlalchemy.orm import Session
-from flask import Flask, request, Response, jsonify, redirect, url_for
+from flask import Flask, request, Response, jsonify, redirect, url_for, send_file
 from yestabak.core.db import Base, engine
 from sqlalchemy.orm import Session, joinedload
-from yestabak.models import Item, Cart, User, Category
+from yestabak.models import Item, CartItem, User, Category
 from yestabak.functions import (
     # User
     get_user,
@@ -12,13 +12,8 @@ from yestabak.functions import (
     update_user,
     delete_user,
     # Cart
-    get_cart_item,
     get_cart_items,
-    create_cart_item,
-    remove_cart_item,
-    update_cart_item,
-    delete_cart_item,
-    delete_cart_items,
+    update_cart_items,
     # Item
     get_item,
     get_items,
@@ -50,6 +45,13 @@ import json
 app = Flask("YesTabak API")
 
 
+@app.route("/api/v1/integrations/freekassa/", methods=["GET", "POST"])
+def freekassa_integration():
+    data = request.json if request.is_json else request.args
+    print(data)
+    return "YES"
+
+
 # ERROR HANDLER - START
 @app.errorhandler(HTTPException)
 def handle_exception(e):
@@ -72,7 +74,7 @@ def handle_exception(e):
 
 
 # USER - START
-@app.post("/api/v1/users")
+@app.post("/api/v1/users/")
 def create_user_v1():
     try:
         data = request.json if request.is_json else request.args
@@ -122,7 +124,7 @@ def create_user_v1():
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.get("/api/v1/users")
+@app.get("/api/v1/users/")
 def get_users_v1():
     try:
         is_succeed, result = get_users(session=Session(engine))
@@ -149,6 +151,13 @@ def get_user_v1(telegram_id: int):
         if is_succeed is None:
             return jsonify({"ok": False, "message": result}), 404
 
+        cart_items = list(
+            map(
+                lambda cart: {**model_to_dict(cart.item), "quantity": cart.quantity},
+                result.cart_items,
+            )
+        )
+
         return (
             jsonify(
                 {
@@ -156,8 +165,9 @@ def get_user_v1(telegram_id: int):
                     "data": {
                         "user": model_to_dict(result),
                         "addresses": list(
-                            map(lambda address: address.data, result.addresses),
+                            map(lambda address: {"id": address.id,"data": address.data}, result.addresses),
                         ),
+                        "cart_items": cart_items,
                     },
                 }
             ),
@@ -215,7 +225,7 @@ def delete_user_v1(telegram_id: int):
 
 
 # ADDRESS - START
-@app.post("/api/v1/addresses")
+@app.post("/api/v1/addresses/")
 def create_address_v1():
     try:
         data = request.json if request.is_json and request.json else None
@@ -269,7 +279,7 @@ def create_address_v1():
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.get("/api/v1/addresses")
+@app.get("/api/v1/addresses/")
 def get_addresses_of_user_v1():
     telegram_id = request.args.get("telegram_id", None)
 
@@ -278,7 +288,7 @@ def get_addresses_of_user_v1():
             jsonify(
                 {
                     "ok": False,
-                    "message": "Please, provide this value as query: teleram_id",
+                    "message": "Please, provide this value as query: telegram_id",
                 }
             ),
             400,
@@ -299,7 +309,7 @@ def get_address_v1(address_id: int):
         if is_succeed is None:
             return jsonify({"ok": False, "message": result}), 404
 
-        result.data["user_id"] = result.user_id
+        # result.data["user_id"] = result.user_id
 
         return (
             jsonify(
@@ -337,7 +347,7 @@ def delete_address_v1(address_id: int):
 
 
 # AFFILIATE - START
-@app.post("/api/v1/affiliates")
+@app.post("/api/v1/affiliates/")
 def create_affiliate_v1():
     try:
         data = request.json if request.is_json and request.json else None
@@ -391,7 +401,7 @@ def create_affiliate_v1():
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.get("/api/v1/affiliates")
+@app.get("/api/v1/affiliates/")
 def get_affiliates_v1():
     try:
         is_succeed, result = get_affiliates(session=Session(engine))
@@ -426,10 +436,10 @@ def get_affiliate_v1(affiliate_id: int):
         if is_succeed is None:
             return jsonify({"ok": False, "message": result}), 404
 
-        result.data[0]['id'] = result.id
-        result.data[0]['group_id'] = result.group_id
-        result.data[0]['created_at'] = result.created_at
-        result.data[0]['last_updated_at'] = result.last_updated_at
+        result.data[0]["id"] = result.id
+        result.data[0]["group_id"] = result.group_id
+        result.data[0]["created_at"] = result.created_at
+        result.data[0]["last_updated_at"] = result.last_updated_at
 
         return (
             jsonify(
@@ -467,7 +477,7 @@ def delete_affiliate_v1(affiliate_id: int):
 
 
 # ITEM- START
-@app.post("/api/v1/items")
+@app.post("/api/v1/items/")
 def create_item_v1():
     try:
         data = request.json if request.is_json else request.args
@@ -517,7 +527,7 @@ def create_item_v1():
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.get("/api/v1/items")
+@app.get("/api/v1/items/")
 def get_items_v1():
     try:
         is_succeed, result = get_items(session=Session(engine))
@@ -619,7 +629,7 @@ def delete_item_v1(item_id: int):
 
 
 # CATEGORY - START
-@app.post("/api/v1/categories")
+@app.post("/api/v1/categories/")
 def create_category_v1():
     try:
         data = request.json if request.is_json else request.args
@@ -648,7 +658,7 @@ def create_category_v1():
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.get("/api/v1/categories")
+@app.get("/api/v1/categories/")
 def get_categories_v1():
     try:
         is_succeed, result = get_categories(session=Session(engine))
@@ -696,7 +706,7 @@ def get_category_v1(category_id: int):
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.get("/api/v1/categories/<int:category_id>/items")
+@app.get("/api/v1/categories/<int:category_id>/items/")
 def get_category_items_v1(category_id: int):
     try:
         is_succeed, result = get_items_by_category_id(
@@ -770,160 +780,35 @@ def delete_category_v1(category_id: int):
 
 
 # CART - START
-@app.post("/api/v1/add_item_to_cart")
-def create_cart_item_v1():
-    try:
-        data = request.json if request.is_json else request.args
-
-        missing_data = list(
-            map(
-                lambda tuple: tuple[1],
-                list(
-                    filter(
-                        lambda value: isinstance(value, tuple) and value[0] is None,
-                        [
-                            data.get("telegram_id", (None, "telegram_id")),
-                            data.get("item_id", (None, "item_id")),
-                        ],
-                    )
-                ),
-            )
-        )
-
-        if len(missing_data) > 0:
-            return (
-                jsonify(
-                    {
-                        "ok": False,
-                        "message": f"missing parameters: {'' + ', '.join(missing_data)}",
-                    }
-                ),
-                400,
-            )
-
-        is_succeed, result = create_cart_item(
-            session=Session(engine),
-            telegram_id=data.get("telegram_id", None),
-            item_id=data.get("item_id", None),
-        )
-
-        if is_succeed is False:
-            return jsonify({"ok": False, "message": f"unknown error: {result}"}), 500
-
-        return jsonify({"ok": True, "data": model_to_dict(result)}), 200
-    except Exception as err:
-        return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
-
-
-@app.post("/api/v1/remove_item_from_cart")
-def remove_cart_item_v1():
-    try:
-        data = request.json if request.is_json else request.args
-
-        missing_data = list(
-            map(
-                lambda tuple: tuple[1],
-                list(
-                    filter(
-                        lambda value: isinstance(value, tuple) and value[0] is None,
-                        [
-                            data.get("telegram_id", (None, "telegram_id")),
-                            data.get("item_id", (None, "item_id")),
-                        ],
-                    )
-                ),
-            )
-        )
-
-        if len(missing_data) > 0:
-            return (
-                jsonify(
-                    {
-                        "ok": False,
-                        "message": f"missing parameters: {'' + ', '.join(missing_data)}",
-                    }
-                ),
-                400,
-            )
-
-        is_succeed, result = remove_cart_item(
-            session=Session(engine),
-            telegram_id=data.get("telegram_id", None),
-            item_id=data.get("item_id", None),
-        )
-
-        if is_succeed is False:
-            return jsonify({"ok": False, "message": f"unknown error: {result}"}), 500
-
-        if is_succeed is None:
-            return (
-                jsonify(
-                    {
-                        "ok": True,
-                        "data": {
-                            "telegram_id": data.get("telegram_id", None),
-                            "item_id": data.get("item_id", None),
-                            "quantity": 0,
-                        },
-                    }
-                ),
-                200,
-            )
-
-        return jsonify({"ok": True, "data": model_to_dict(result)}), 200
-    except Exception as err:
-        return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
-
-
-@app.route("/api/v1/cart/<int:item_id>", methods=["GET", "POST"])
-def get_cart_item_v1(item_id: int):
+@app.post("/api/v1/users/<int:telegram_id>/cart_items/")
+def create_cart_item_v1(telegram_id: int):
     """
-    Get item from cart(if exists), otherwise return {"telegram_id": 421770530, "item_id": 1, "quanity": 0}
+    Add item/items to cart.
     """
-    data = request.json if request.is_json else request.args
-
     try:
-        is_succeed, result = get_cart_item(
+        data = request.json if request.is_json and request.json else {}
+
+        is_succeed, result = update_cart_items(
             session=Session(engine),
-            telegram_id=data.get("telegram_id", None),
-            item_id=item_id,
+            telegram_id=telegram_id,
+            items=data.get("items", []),
         )
 
         if is_succeed is False:
             return jsonify({"ok": False, "message": f"unknown error: {result}"}), 500
 
-        session = Session(engine)
-        item = session.query(Item).filter(Item.id == int(item_id)).first()
-
-        if not item:
-            return jsonify({"ok": False, "data": f"<Item id:{id}> doesn't exist!"}), 404
-
-        item = model_to_dict(item)
-
-        if is_succeed is None:
-            return (
-                jsonify(
-                    {
-                        "ok": True,
-                        "data": {
-                            "telegram_id": data.get("telegram_id", None),
-                            "item_id": item_id,
-                            "quantity": 0,
-                            "item": item,
-                        },
-                    }
-                ),
-                200,
+        cart_items = list(
+            map(
+                lambda cart: {**model_to_dict(cart.item), "quantity": cart.quantity},
+                result,
             )
-
-        result = model_to_dict(result)
-        result["item"] = item
+        )
 
         return (
             jsonify(
                 {
                     "ok": True,
-                    "data": result,
+                    "data": cart_items,
                 },
             ),
             200,
@@ -932,23 +817,63 @@ def get_cart_item_v1(item_id: int):
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.route("/api/v1/cart", methods=["GET", "POST"])
-def get_all_cart_items_v1():
-    data = request.json if request.is_json else request.args
+# @app.delete("/api/v1/users/<int:telegram_id>/cart/<int:item_id>")
+# def remove_cart_item_v1(telegram_id: int, item_id: int):
+#     """
+#     Reduce item quantity in cart by 1 (item_quantity - 1)
+#     """
+#     try:
+#         is_succeed, result = remove_cart_item(
+#             session=Session(engine),
+#             telegram_id=telegram_id,
+#             item_id=item_id,
+#         )
 
+#         if is_succeed is False:
+#             return jsonify({"ok": False, "message": f"unknown error: {result}"}), 500
+
+#         is_succeed, result = get_cart_items(
+#             session=Session(engine), telegram_id=telegram_id
+#         )
+
+#         if is_succeed is False:
+#             return jsonify({"ok": False, "message": f"unknown error: {result}"}), 500
+
+#         return (
+#             jsonify(
+#                 {
+#                     "ok": True,
+#                     "data": models_to_dict_list(result),
+#                 },
+#             ),
+#             200,
+#         )
+#     except Exception as err:
+#         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
+
+
+@app.get("/api/v1/users/<int:telegram_id>/cart_items/")
+def get_all_cart_items_v1(telegram_id: int):
     try:
         is_succeed, result = get_cart_items(
-            session=Session(engine), telegram_id=data.get("telegram_id", None)
+            session=Session(engine), telegram_id=telegram_id
         )
 
         if is_succeed is False:
             return jsonify({"ok": False, "message": f"unknown error: {result}"}), 500
 
+        cart_items = list(
+            map(
+                lambda cart: {**model_to_dict(cart.item), "quantity": cart.quantity},
+                result,
+            )
+        )
+
         return (
             jsonify(
                 {
                     "ok": True,
-                    "data": models_to_dict_list(result),
+                    "data": cart_items,
                 },
             ),
             200,
@@ -957,49 +882,34 @@ def get_all_cart_items_v1():
         return jsonify({"ok": False, "message": f"server-side error: {err}"}), 500
 
 
-@app.delete("/api/v1/cart/<int:item_id>")
-def delete_cart_item_v1(item_id: int):
-    data = request.json if request.is_json else request.args
+# @app.delete("/api/v1/cart/<int:item_id>")
+# def delete_cart_item_v1(item_id: int):
+#     """
+#     Reduces quantity of item in cart down to 0 (even if quantity is 10)
+#     """
+#     data = request.json if request.is_json else request.args
 
-    is_deleted, result = delete_cart_item(
-        Session(engine), item_id=item_id, telegram_id=data.get("telegram_id", None)
-    )
+#     is_deleted, result = delete_cart_item(
+#         Session(engine), item_id=item_id, telegram_id=data.get("telegram_id", None)
+#     )
 
-    if is_deleted is False:
-        return (
-            jsonify({"ok": False, "message": f"unknown error when deleting: {result}"}),
-            500,
-        )
+#     if is_deleted is False:
+#         return (
+#             jsonify({"ok": False, "message": f"unknown error when deleting: {result}"}),
+#             500,
+#         )
 
-    if is_deleted is None:
-        return (
-            jsonify({"ok": False, "message": result}),
-            404,
-        )
+#     if is_deleted is None:
+#         return (
+#             jsonify({"ok": False, "message": result}),
+#             404,
+#         )
 
-    return jsonify({"ok": True, "data": {"item_id": result, "deleted": True}}), 200
-
-
-@app.delete("/api/v1/cart")
-def delete_all_cart_items_v1():
-    data = request.json if request.is_json else request.args
-
-    is_deleted, result = delete_cart_items(
-        Session(engine), item_id=item_id, telegram_id=data.get("telegram_id", None)
-    )
-
-    if is_deleted is False:
-        return (
-            jsonify({"ok": False, "message": f"unknown error when deleting: {result}"}),
-            500,
-        )
-
-    return jsonify({"ok": True, "data": {"item_ids": result, "deleted": True}}), 200
-
+#     return jsonify({"ok": True, "data": {"item_id": result, "deleted": True}}), 200
 
 # CART- END
 
 
 if __name__ == "__main__":
-    print(f"Running at http://localhost:8000")
-    app.run(debug=True, host=HOST, port=PORT)
+    print(f"Running at http://127.0.0.1:8000")
+    app.run(host=HOST, port=PORT)

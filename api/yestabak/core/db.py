@@ -3,17 +3,15 @@ from sqlalchemy import MetaData, create_engine
 
 
 SQLALCHEMY_DATABASE_URL = (
-    "postgresql+psycopg2://postgres:ulan290106@localhost:5433/yestabak"
+    "postgresql+psycopg2://postgres:qwerty123456@localhost:5432/yestabak"
 )
 
 # Create engine with postgresql connection uri
-engine = create_engine(SQLALCHEMY_DATABASE_URL, encoding="utf-8", echo=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
-# Bind engine with MetaData
-meta = MetaData(engine)
 
 # Get default sqlalchemy model's class to extend it soon
-SQLAlchemyBase = declarative_base(metadata=meta)
+SQLAlchemyBase = declarative_base()
 
 
 # Extend 'SQLAlchemyBase' class with our new 'Base' class.

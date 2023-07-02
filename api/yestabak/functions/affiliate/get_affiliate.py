@@ -8,6 +8,7 @@ def get_affiliate(
 ) -> Tuple[Union[bool, None], Union[Affiliate, str]]:
     try:
         affiliate = session.query(Affiliate).filter(Affiliate.id == int(id)).first()
+        session.close()
 
         if not affiliate:
             return (None, f"<Affiliate id:{id}> doesn't exist!")

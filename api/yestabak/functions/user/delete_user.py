@@ -14,6 +14,7 @@ def delete_user(
 
         session.delete(user)
         session.commit()
+        session.close()
 
         return (True, telegram_id)
     except Exception as err:

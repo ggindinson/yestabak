@@ -8,6 +8,7 @@ def get_items(
 ) -> Tuple[bool, Union[List[Item], list, str]]:
     try:
         items = session.query(Item).all()
+        session.close()
 
         if not items:
             return (True, [])

@@ -14,6 +14,7 @@ def delete_address(
 
         session.delete(address)
         session.commit()
+        session.close()
 
         return (True, id)
     except Exception as err:

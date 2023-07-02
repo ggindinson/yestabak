@@ -12,6 +12,7 @@ def delete_item(session: Session, id: int) -> Tuple[Union[bool, None], Union[int
 
         session.delete(item)
         session.commit()
+        session.close()
         return (True, id)
     except Exception as err:
         session.rollback()

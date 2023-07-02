@@ -14,6 +14,7 @@ def create_affiliate(
         affiliate = (
             session.query(Affiliate).filter(Affiliate.id == int(affiliate.id)).first()
         )
+        session.close()
         return (True, affiliate)
     except Exception as err:
         session.rollback()

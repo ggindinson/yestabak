@@ -8,6 +8,7 @@ def get_category(
 ) -> Tuple[Union[bool, None], Union[Category, str]]:
     try:
         category = session.query(Category).filter(Category.id == int(id)).first()
+        session.close()
 
         if not category:
             return (None, f"<Category id:{id}> doesn't exist!")

@@ -17,6 +17,7 @@ def get_items_by_category_id(
         items_by_category_id = (
             session.query(Item).filter(Item.category_id == int(category_id)).all()
         )
+        session.close()
 
         if not items_by_category_id:
             return (True, [])

@@ -8,12 +8,10 @@ def get_user(
 ) -> Tuple[Union[bool, None], Union[User, str]]:
     try:
         user = session.query(User).filter(User.telegram_id == int(telegram_id)).first()
+        session.close()
 
         if not user:
             return (None, f"<User telegram_id:{telegram_id}> doesn't exist!")
-
-        print("  -  User:", user)
-        print("  -  Addresses:", user.addresses)
 
         return (True, user)
     except Exception as err:

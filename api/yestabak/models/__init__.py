@@ -1,4 +1,4 @@
-from yestabak.models.cart.models import Cart
+from yestabak.models.cart.models import CartItem
 from yestabak.models.item.models import Item
 from yestabak.models.user.models import User
 from yestabak.models.address.models import Address

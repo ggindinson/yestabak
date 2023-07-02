@@ -17,13 +17,8 @@ from yestabak.functions.category.get_category import get_category
 from yestabak.functions.category.get_categories import get_categories
 from yestabak.functions.category.update_category import update_category
 
-from yestabak.functions.cart.create_cart_item import create_cart_item
-from yestabak.functions.cart.remove_cart_item import remove_cart_item
-from yestabak.functions.cart.delete_cart_item import delete_cart_item
-from yestabak.functions.cart.delete_cart_items import delete_cart_items
-from yestabak.functions.cart.get_cart_item import get_cart_item
 from yestabak.functions.cart.get_cart_items import get_cart_items
-from yestabak.functions.cart.update_cart_item import update_cart_item
+from yestabak.functions.cart.update_cart_items import update_cart_items
 
 from yestabak.functions.address.create_address import create_address
 from yestabak.functions.address.delete_address import delete_address

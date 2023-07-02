@@ -8,6 +8,7 @@ def get_address(
 ) -> Tuple[Union[bool, None], Union[Address, str]]:
     try:
         address = session.query(Address).filter(Address.id == int(id)).first()
+        session.close()
 
         if not address:
             return (None, f"<Address id:{id}> doesn't exist!")

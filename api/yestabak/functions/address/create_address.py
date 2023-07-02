@@ -12,6 +12,7 @@ def create_address(
         session.commit()
 
         address = session.query(Address).filter(Address.id == int(address.id)).first()
+        session.close()
         return (True, address)
     except Exception as err:
         session.rollback()

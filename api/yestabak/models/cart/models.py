@@ -1,38 +1,37 @@
+from typing import List
 from sqlalchemy import ForeignKey, Column, String, Integer, Text, DateTime, BigInteger
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+
 from yestabak.core.db import Base
 
 
-class Cart(Base):
-    """Корзина пользователя"""
+class CartItem(Base):
+    """Ассоциативная таблица для связи пользователя и корзин с товарами"""
 
-    __tablename__ = "carts"
-    __table_args__ = {
-        "extend_existing": True
-    }  # redefine the table if it already exists
+    __tablename__ = "cart_items"
 
-    id = Column(
-        BigInteger,
+    id: Mapped[int] = mapped_column(
         primary_key=True,
         autoincrement=True,
         nullable=False,
         index=True,
-        comment="ID of the cart",
+        comment="ID of the cart item",
     )
-
-    telegram_id = Column(
-        BigInteger,
+    telegram_id: Mapped[int] = mapped_column(
         ForeignKey("users.telegram_id", ondelete="cascade"),
+        nullable=True,
         index=True,
-        comment="Уникальный телеграм-идентификатор пользователя",
+        comment="Уникальный идентификатор юзера",
     )
-    user = relationship("User", lazy="joined")
-
-    item_id = Column(
-        Integer,
+    item_id: Mapped[int] = mapped_column(
         ForeignKey("items.id", ondelete="cascade"),
+        primary_key=True,
+        index=True,
         comment="Уникальный идентификатор товара",
     )
-    item = relationship("Item", lazy="joined")
+    quantity: Mapped[int] = mapped_column(default=1, comment="Количество товара")
 
-    quantity = Column(BigInteger, comment="Количество товаров", default=1)
+    user: Mapped["User"] = relationship(back_populates="cart_items")
+    item: Mapped["Item"] = relationship(back_populates="cart_items", lazy="joined")

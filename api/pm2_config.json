@@ -1,0 +1,14 @@
+{
+    "apps": [
+      {
+        "name": "YesTabak Flask API",
+        "script": "gunicorn --workers=4 -b 127.0.0.1:8000 --worker-class=meinheld.gmeinheld.MeinheldWorker main:app",
+        "watch": false,
+        "max_memory_restart": "256M",
+        "output": "/var/www/html/logs/my-app-out.log",
+        "error": "/var/www/html/logs/my-app-error.log",
+        "kill_timeout": 5000,
+        "restartDelay": 5000
+      }
+    ]
+  }

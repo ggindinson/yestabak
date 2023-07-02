@@ -3,9 +3,10 @@ from yestabak.models import Category
 from typing import Tuple, List, Union
 
 
-def get_categories(session: Session) -> Tuple[bool, Union[List[Category]], list, str]:
+def get_categories(session: Session) -> Tuple[bool, Union[List[Category], list, str]]:
     try:
         categories = session.query(Category).all()
+        session.close()
 
         if not categories:
             return (True, [])

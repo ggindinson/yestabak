@@ -14,6 +14,7 @@ def delete_affiliate(
 
         session.delete(affiliate)
         session.commit()
+        session.close()
 
         return (True, id)
     except Exception as err:

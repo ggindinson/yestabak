@@ -18,6 +18,7 @@ def create_item(
         session.commit()
 
         item = session.query(Item).filter(Item.id == int(item.id)).first()
+        session.close()
         return (True, item)
     except Exception as err:
         session.rollback()

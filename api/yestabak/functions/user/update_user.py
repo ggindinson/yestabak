@@ -16,6 +16,7 @@ def update_user(
         session.commit()
 
         user = session.query(User).filter(User.telegram_id == int(telegram_id)).first()
+        session.close()
 
         if not user:
             return (None, f"<User telegram_id:{telegram_id}> doesn't exist!")

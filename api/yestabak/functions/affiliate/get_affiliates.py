@@ -8,6 +8,7 @@ def get_affiliates(
 ) -> Tuple[Union[bool, None], Union[List[Affiliate], str]]:
     try:
         affiliates = session.query(Affiliate).all()
+        session.close()
 
         if not affiliates:
             return (True, [])
