@@ -16,6 +16,7 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
     current_item_info_id = state_data.get("current_item_info_id")
 
     for item in items:
+        item_clicked = None
         if item["id"] == int(item_id):
             item_clicked = item
             break

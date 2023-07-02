@@ -114,7 +114,7 @@ async def address_edit_manager(call: CallbackQuery, state: FSMContext, api: ApiW
     else:
         await call.message.delete()
         msg = await call.message.answer(
-            'Пришлите название адреса (например "Мой дом")',
+            'Пришлите название адреса (например, "Мой дом") \n\nНикто кроме вас не будет видеть эту информацию!',
             reply_markup=cancel_address_kb(),
         )
         await state.clear()

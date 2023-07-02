@@ -6,7 +6,8 @@ from yestabak.api_wrapper.api_classes import Address
 
 
 def format_address(address: str):
-    return address[:-10] + "..." if len(address) > 10 else address
+    # return address[:-10] + "..." if len(address) > 10 else address
+    return address[:-10] + "..." if len(address) > 20 else address
 
 
 def addresses_kb(addresses: List[Address]) -> InlineKeyboardMarkup:

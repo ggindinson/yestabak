@@ -1,6 +1,9 @@
 from sqlalchemy import Column, String, BigInteger
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from yestabak.core.db import Base
+from typing import List
 
 
 class Category(Base):
@@ -11,8 +14,7 @@ class Category(Base):
         "extend_existing": True
     }  # redefine the table if it already exists
 
-    id = Column(
-        BigInteger,
+    id: Mapped[int] = mapped_column(
         primary_key=True,
         autoincrement=True,
         nullable=False,
@@ -20,11 +22,10 @@ class Category(Base):
         comment="ID of the category",
     )
 
-    name = Column(
-        String(255),
+    name: Mapped[str] = mapped_column(
         nullable=False,
         unique=True,
         comment="Название категории",
     )
 
-    items = relationship("Item", back_populates="category", lazy="joined")
+    items: Mapped[List["Item"]] = relationship(back_populates="category", lazy="joined", cascade="delete, delete-orphan")
