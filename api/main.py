@@ -188,6 +188,7 @@ def update_user_v1(telegram_id: int):
             first_name=data.get("first_name", None),
             last_name=data.get("last_name", None),
             username=data.get("username", None),
+            role=data.get("role", None),
             phone_number=data.get("phone_number", None),
         )
 
