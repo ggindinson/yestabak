@@ -203,3 +203,13 @@ async def update_item_data(message: Message, state: FSMContext, api: ApiWrapper)
     await message.answer("✅ Товар успешно обновлен", reply_markup=admin_back_kb())
 
     await state.clear()
+
+
+@staffRouter.message(F.text.startswith("+admin") | F.text.startswith("-admin"))
+async def manage_admin_role(message: Message, api: ApiWrapper):
+    user_id = int(message.text.split(" ")[-1])
+    await api.update_user_role(
+        user_id=user_id, role="admin" if "+admin" in message.text else "user"
+    )
+    await message.delete()
+    await message.answer("Админка обновлена ✅", reply_markup=admin_back_kb())

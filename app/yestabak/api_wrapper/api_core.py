@@ -37,6 +37,12 @@ class ApiWrapper:
         )
         return response
 
+    async def update_user_role(self, user_id: int, role: str):
+        response = await self.__request(
+            "PATCH", self.BASE_URL + f"/users{user_id}", role=role
+        )
+        return response
+
     # Categories
     async def get_categories(self):
         response = await self.__request("GET", self.BASE_URL + "/categories")
