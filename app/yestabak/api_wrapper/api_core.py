@@ -39,7 +39,7 @@ class ApiWrapper:
 
     async def update_user_role(self, user_id: int, role: str):
         response = await self.__request(
-            "PATCH", self.BASE_URL + f"/users{user_id}", role=role
+            "PATCH", self.BASE_URL + f"/users/{user_id}", role=role
         )
         return response
 
@@ -152,7 +152,7 @@ class ApiWrapper:
                 method, url, params=params, json=data
             ) as response:
                 json_data = await response.json()
-                print(url, data, json_data)
+                # print(url, data, json_data)
                 if not json_data.get("ok", True):
                     raise Exception(
                         f"error while recieving data from api\n Response: {json_data}"
