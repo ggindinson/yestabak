@@ -10,15 +10,18 @@ def format_address(address: str):
     return address[:-10] + "..." if len(address) > 20 else address
 
 
-def addresses_kb(addresses: List[Address]) -> InlineKeyboardMarkup:
+def addresses_kb(addresses: List[Address], is_order=False) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     for address in addresses:
         builder.button(
             text=format_address(address.data["name"]),
-            callback_data=f"address_additional_{address.id}",
+            callback_data=f"finish_order_{address.id}"
+            if is_order
+            else f"address_additional_{address.id}",
         )
-    builder.button(text="Добавить новый адрес", callback_data="add_address")
-    builder.button(text="◀️ В личный кабинет", callback_data="my_profile")
+    if not is_order:
+        builder.button(text="Добавить новый адрес", callback_data="add_address")
+        builder.button(text="◀️ В личный кабинет", callback_data="my_profile")
     builder.adjust(1)
     return builder.as_markup()
 

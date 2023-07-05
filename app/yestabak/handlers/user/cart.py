@@ -3,6 +3,8 @@ from aiogram import F, Bot
 from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from yestabak.handlers.user.profile import my_addresses
+from yestabak.keyboards.addresses_builder import addresses_kb
 from yestabak.handlers.user.start import start_handler
 from yestabak.routes import userRouter
 from yestabak.keyboards import cart_kb
@@ -37,12 +39,27 @@ async def delete_cart_item(call: CallbackQuery, state: FSMContext):
     await call.message.edit_reply_markup(reply_markup=cart_kb(updated_cart))
 
 
-@userRouter.callback_query(F.data == "payment_start")
-async def payment_start(
+@userRouter.callback_query(F.data == "procedure_order")
+async def procedure_order(call: CallbackQuery, api: ApiWrapper, state: FSMContext):
+    addresses = (await api.get_user_if_exists(call.from_user.id)).addresses
+    if not len(addresses):
+        await call.answer("Добавьте адреса в профиле для продолжения", show_alert=True)
+        return await my_addresses(call, api, state)
+    await call.message.delete()
+    await call.message.answer(
+        "Выберите адрес из добавленных вами ниже:",
+        reply_markup=addresses_kb(addresses, is_order=True),
+    )
+
+
+@userRouter.callback_query(F.data.contains("finish_order"))
+async def finish_order(
     call: CallbackQuery, state: FSMContext, api: ApiWrapper, bot: Bot
 ):
+    address_id = int(call.data.split("_")[-1])
     await state.clear()
     user = await api.get_user_if_exists(call.from_user.id)
+    address = list(filter(lambda address: address.id == address_id, user.addresses))[0]
 
     if not user.addresses or len(user.addresses) == 0:
         return
@@ -51,7 +68,7 @@ async def payment_start(
         f"Поступил заказ! \n"
         + f"Заказчик: <a href=\"tg://openmessage?user_id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
         + f"Номер телефона: {user.user.phone_number} \n"
-        + f"Адрес: {user.addresses[0].data['name'] if len(user.addresses) else ''} \n"
+        + f"Адрес: {address.data['address']} \n"
         + f"Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \n"
         + f"Товары: "
     )

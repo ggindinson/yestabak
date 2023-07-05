@@ -14,7 +14,7 @@ def cart_kb(items) -> InlineKeyboardMarkup:
             text=f"🗑️ Убрать {name} из корзины",
             callback_data=f"delete_cartitem_{item['id']}",
         )
-    builder.button(text="🎯 Оформить заказ", callback_data="payment_start") if len(
+    builder.button(text="🎯 Оформить заказ", callback_data="procedure_order") if len(
         items
     ) else builder.button(text="➡️ К категориям", callback_data="all_categories")
     builder.button(text="❌ Закрыть корзину", callback_data="main_menu")

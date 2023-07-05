@@ -1,9 +1,13 @@
+import logging
+
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from typing import Callable, Dict, Any, Awaitable
 
 from yestabak.api_wrapper import ApiWrapper
+
+logger = logging.getLogger()
 
 
 class TransferCartDataMiddleware(BaseMiddleware):
@@ -22,9 +26,13 @@ class TransferCartDataMiddleware(BaseMiddleware):
         ]:
             return await handler(call, data)
         cart = (await state.get_data())["cart"]
+        logger.info(cart)
 
         for row in cart:
-            row["item_id"] = row.pop("id")
+            try:
+                row["item_id"] = row.pop("id")
+            except:
+                break
 
         await api.post_cart(user_id=call.from_user.id, cart=cart)
         return await handler(call, data)
