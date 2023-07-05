@@ -168,7 +168,13 @@ async def proceed_item_price(message: Message, state: FSMContext, api: ApiWrappe
     del data["msg"]
 
     await message.delete()
-    await api.create_item(**data, price=price)
+    await api.create_item(
+        name=data["name"],
+        price=price,
+        description=data["description"],
+        photo=data["photo"],
+        category_id=data["category_id"],
+    )
     await state.clear()
     await msg.edit_text("✅ Товар успешно добавлен", reply_markup=admin_back_kb())
 

@@ -1,11 +1,15 @@
-from aiogram import F
+from datetime import datetime
+from aiogram import F, Bot
 from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from yestabak.handlers.user.start import start_handler
 from yestabak.routes import userRouter
 from yestabak.keyboards import cart_kb
 from yestabak.api_wrapper import ApiWrapper
 from yestabak.states import CartState
+
+CHAT_ID = -975798047
 
 
 @userRouter.callback_query(F.data == "my_cart", StateFilter("*"))
@@ -32,3 +36,25 @@ async def delete_cart_item(call: CallbackQuery, state: FSMContext):
     updated_cart = list(filter(lambda item: item["id"] != item_id, current_cart))
     await state.update_data(cart=updated_cart)
     await call.message.edit_reply_markup(reply_markup=cart_kb(updated_cart))
+
+
+@userRouter.callback_query(F.data == "payment_start")
+async def payment_start(
+    call: CallbackQuery, state: FSMContext, api: ApiWrapper, bot: Bot
+):
+    await state.clear()
+    user = await api.get_user_if_exists(call.from_user.id)
+    formatted_text = f"""Поступил заказ!
+Заказчик: <a href='tg://openmessage?user_id={call.from_user.id}'>{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a>
+Номер телефона: {user.user.phone_number}
+{'Адрес:' + user.addresses[0].data['name'] if len(user.addresses) else ''}
+Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Товары: 
+"""
+    for item in user.cart_items:
+        formatted_text += f"\n{item.name} - {item.quantity}"
+    await bot.send_message(CHAT_ID, formatted_text)
+    await api.post_cart(call.from_user.id, [])
+    await call.answer("Заказ оформлен ✅", show_alert=True)
+    await start_handler(call, state, api)
