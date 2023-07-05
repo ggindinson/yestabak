@@ -214,6 +214,12 @@ async def update_item_data(message: Message, state: FSMContext, api: ApiWrapper)
 @staffRouter.message(F.text.startswith("+admin") | F.text.startswith("-admin"))
 async def manage_admin_role(message: Message, api: ApiWrapper):
     user_id = int(message.text.split(" ")[-1])
+
+    if message.from_user.id == user_id:
+        await message.delete()
+        await message.answer("Вы не можете снять права администратора с себя ❌", reply_markup=admin_back_kb())
+        return
+    
     await api.update_user_role(
         user_id=user_id, role="admin" if "+admin" in message.text else "user"
     )
