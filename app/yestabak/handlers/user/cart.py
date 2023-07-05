@@ -1,6 +1,6 @@
 from datetime import datetime
 from aiogram import F, Bot
-from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
+from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from yestabak.handlers.user.start import start_handler
@@ -8,8 +8,7 @@ from yestabak.routes import userRouter
 from yestabak.keyboards import cart_kb
 from yestabak.api_wrapper import ApiWrapper
 from yestabak.states import CartState
-
-CHAT_ID = -975798047
+from yestabak.configs.config import CHAT_ID
 
 
 @userRouter.callback_query(F.data == "my_cart", StateFilter("*"))
@@ -44,17 +43,26 @@ async def payment_start(
 ):
     await state.clear()
     user = await api.get_user_if_exists(call.from_user.id)
-    formatted_text = f"""Поступил заказ!
-Заказчик: <a href='tg://openmessage?user_id={call.from_user.id}'>{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a>
-Номер телефона: {user.user.phone_number}
-{'Адрес:' + user.addresses[0].data['name'] if len(user.addresses) else ''}
-Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-Товары: 
-"""
+    if not user.addresses or len(user.addresses) == 0:
+        return
+
+    formatted_text = (
+        f"Поступил заказ! \n"
+        + f"Заказчик: <a href=\"tg://openmessage?user_id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
+        + f"Номер телефона: {user.user.phone_number} \n"
+        + f"Адрес: {user.addresses[0].data['name'] if len(user.addresses) else ''} \n"
+        + f"Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \n"
+        + f"Товары: "
+    )
     for item in user.cart_items:
-        formatted_text += f"\n{item.name} - {item.quantity}"
+        formatted_text += f"\n ~ [{item.quantity} шт.] {item.name}"
+
     await bot.send_message(CHAT_ID, formatted_text)
+
     await api.post_cart(call.from_user.id, [])
-    await call.answer("Заказ оформлен ✅", show_alert=True)
+    await call.answer(
+        "Заказ оформлен ✅ \nС вами в скором времени свяжется наш сотрудник! 😎",
+        show_alert=True,
+    )
     await start_handler(call, state, api)
