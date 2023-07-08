@@ -94,6 +94,6 @@ async def get_phone(message: Message, state: FSMContext, api: ApiWrapper):
 
     await state.clear()
     await message.delete()
-    await msg.edit_reply_markup(ReplyKeyboardRemove())
     await msg.delete()
+    await message.answer(text="<b>Спасибо за регистрацию!</b> \n<i>Теперь вы можете пользоваться нашим ботом!</i>", reply_markup=None)
     await start_handler(message, state, api)
