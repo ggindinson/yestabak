@@ -62,6 +62,7 @@ async def finish_order(
     address = list(filter(lambda address: address.id == address_id, user.addresses))[0]
 
     if not user.addresses or len(user.addresses) == 0:
+        await call.answer(text="Вы не добавляли адрес для доставки. \nПерейдите в профиль и добавьте адрес!", show_alert=True)
         return
 
     formatted_text = (

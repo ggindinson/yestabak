@@ -57,7 +57,6 @@ def cart_dispatch(
 
         case ("delete", item_id):
             cart = list(filter(lambda item: item["id"] != item_id, cart))
-
             return cart
 
         case _:

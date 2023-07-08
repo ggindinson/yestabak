@@ -29,11 +29,13 @@ class ApiWrapper:
         response = await self.__request(
             "POST",
             self.BASE_URL + "/users",
-            telegram_id=telegram_id,
-            first_name=first_name,
-            last_name=last_name,
-            username=username,
-            phone_number=phone_number,
+            data={
+                "telegram_id": telegram_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "username": username,
+                "phone_number": phone_number,
+            },
         )
         return response
 
@@ -107,7 +109,7 @@ class ApiWrapper:
         )
         return response
 
-    async def post_cart(self, user_id: int, cart: List[Dict[int, int]]):
+    async def post_cart(self, user_id: int, cart: List[Dict[str, int]]):
         response = await self.__request(
             "POST",
             self.BASE_URL + f"/users/{user_id}/cart_items/",
@@ -149,13 +151,22 @@ class ApiWrapper:
         params = self.__build_params(**params)
         print(params, data)
         async with self.api_session() as session:
-            async with session.request(
-                method, url, json=params
-            ) as response:
+            # payload = {}
+
+            # if params and data:
+            #     payload = {"params": params, "json": data}
+            # elif params and not data:
+            #     payload = {"json": params}
+            # elif not params and data:
+            #     payload = {"json": data}
+
+            # print("Payload:", payload)
+
+            async with session.request(method, url, params=params, json=data) as response:
                 json_data = await response.json()
                 print(url, data, json_data)
                 if not json_data.get("ok", True):
                     raise Exception(
-                        f"error while recieving data from api\n Response: {json_data}"
+                        f"error while receiving data from api\n Response: {json_data}"
                     )
                 return json_data.get("data")

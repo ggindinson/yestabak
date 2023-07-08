@@ -46,9 +46,9 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
     await state.update_data(cart=cart)
 
     if event_type == "increase" and int(item_id) != current_item_info_id:
-        caption = f"""Выбранный товар: {item_clicked["name"]}
-Описание: {item_clicked["description"]}
-Цена: {item_clicked["price"]}"""
+        caption = f"""<b>Выбранный товар:</b> <b><i>{item_clicked["name"]}</i></b>
+<b>Описание:</b> <i>{item_clicked["description"]}</i>
+<b>Цена:</b> <b><i>{item_clicked["price"]} {item_clicked["currency"]}</i></b>"""
 
         await call.message.edit_media(
             InputMediaPhoto(

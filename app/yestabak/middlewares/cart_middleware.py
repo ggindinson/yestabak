@@ -31,7 +31,8 @@ class TransferCartDataMiddleware(BaseMiddleware):
         for row in cart:
             try:
                 row["item_id"] = row.pop("id")
-            except:
+            except Exception as err:
+                print("Error in cart middleware:", err)
                 break
 
         await api.post_cart(user_id=call.from_user.id, cart=cart)

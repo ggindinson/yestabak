@@ -66,7 +66,7 @@ async def admin_item_settings(call: CallbackQuery, api: ApiWrapper):
         photo=URLInputFile(url=item["photo"])
         if "https" in item["photo"]
         else item["photo"],
-        caption=f"Здесь вы можете отредактировать/удалить товар\n\n{item['name']}\nОписание: {item['description']}\nЦена: {item['price']}",
+        caption=f"Здесь вы можете отредактировать/удалить товар\n\n{item['name']}\n<b>Описание:</b> {item['description']}\n<b>Цена:</b> {item['price']}",
         reply_markup=admin_item_settings_kb(item, category_id),
     )
 
