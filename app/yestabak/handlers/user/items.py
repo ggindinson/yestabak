@@ -48,7 +48,7 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
     if event_type == "increase" and int(item_id) != current_item_info_id:
         caption = f"""<b>Выбранный товар:</b> <b><i>{item_clicked["name"]}</i></b>
 <b>Описание:</b> <i>{item_clicked["description"]}</i>
-<b>Цена:</b> <b><i>{item_clicked["price"]} {item_clicked["currency"]}</i></b>"""
+<b>Цена:</b> <b><i>{item_clicked["price"]} {"рублей" if item_clicked["currency"] == "RUB" else ""}</i></b>"""
 
         await call.message.edit_media(
             InputMediaPhoto(
