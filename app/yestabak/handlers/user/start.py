@@ -88,7 +88,7 @@ async def get_phone(message: Message, state: FSMContext, api: ApiWrapper):
     await api.create_user(
         phone_number=message.text or message.contact.phone_number,
         telegram_id=message.from_user.id,
-        username=message.from_user.username,
+        username=message.from_user.username if message.from_user.username else None,
         **data
     )
 

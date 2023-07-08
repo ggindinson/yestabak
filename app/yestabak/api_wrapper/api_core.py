@@ -135,8 +135,8 @@ class ApiWrapper:
         valued_params = {}
 
         for key, value in params.items():
-            if value is not None:
-                valued_params[key] = value
+            # if value is not None:
+            valued_params[key] = value
         return valued_params
 
     async def __request(
@@ -147,12 +147,13 @@ class ApiWrapper:
         **params,
     ):
         params = self.__build_params(**params)
+        print(params, data)
         async with self.api_session() as session:
             async with session.request(
-                method, url, params=params, json=data
+                method, url, json=params
             ) as response:
                 json_data = await response.json()
-                # print(url, data, json_data)
+                print(url, data, json_data)
                 if not json_data.get("ok", True):
                     raise Exception(
                         f"error while recieving data from api\n Response: {json_data}"

@@ -1,4 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, BIGINT, Text, DateTime
 from sqlalchemy import MetaData, create_engine
 
 
@@ -17,6 +18,10 @@ SQLAlchemyBase = declarative_base()
 # Extend 'SQLAlchemyBase' class with our new 'Base' class.
 class Base(SQLAlchemyBase):
     __abstract__ = True
+
+    type_annotation_map = {
+        int: BIGINT
+        }
 
     def __repr__(self):
         try:
