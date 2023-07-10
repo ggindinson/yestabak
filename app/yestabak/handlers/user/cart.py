@@ -96,11 +96,11 @@ async def finish_order(
     #     return
 
     formatted_text = (
-        f"Поступил заказ! \n"
+        f"✅ Поступил заказ! \n"
         + f"Заказчик (реальное фио): <a href=\"tg://user?id={call.from_user.id}\">{user.user.first_name} {user.user.last_name if user.user.last_name else ''}</a> \n"
         + f"Телеграм: <a href=\"tg://user?id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
         + f"Номер телефона: {user.user.phone_number} \n"
-        + f"Адрес: {address.data['address']} \n"
+        + f"Адрес: <code>{address.data['address']}</code> \n"
         + f"Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \n"
         + f"Товары: "
     )
@@ -125,12 +125,12 @@ async def finish_order(
     except exceptions.TelegramBadRequest as err:
         if "BUTTON_USER_PRIVACY_RESTRICTED" in err.message:
             formatted_text = (
-                f"Поступил заказ! \n"
+                f"✅ Поступил заказ! \n"
                 + f"Заказчик (реальное фио): <a href=\"tg://user?id={call.from_user.id}\">{user.user.first_name} {user.user.last_name if user.user.last_name else ''}</a> \n\n"
                 + f"Телеграм: <a href=\"tg://user?id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
-                + f"<b><i>Телеграм пользователя приватный, скорее всего через телграм вы с ним никак не свяжетесь!</i></b> \n\n"
+                + f"<b><i>⚠️ Телеграм пользователя приватный, скорее всего через телеграм вы с ним никак не свяжетесь!</i></b> \n\n"
                 + f"Номер телефона: {user.user.phone_number} \n"
-                + f"Адрес: {address.data['address']} \n"
+                + f"Адрес: <code>{address.data['address']}</code> \n"
                 + f"Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \n"
                 + f"Товары: "
             )
