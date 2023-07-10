@@ -1,6 +1,7 @@
 from datetime import datetime
 from aiogram import F, Bot
-from aiogram.types import CallbackQuery, FSInputFile
+from aiogram.types import CallbackQuery, InputMediaPhoto
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from yestabak.handlers.user.profile import my_addresses
@@ -10,20 +11,34 @@ from yestabak.routes import userRouter
 from yestabak.keyboards import cart_kb
 from yestabak.api_wrapper import ApiWrapper
 from yestabak.states import CartState
-from yestabak.configs.config import CHAT_ID
+from yestabak.configs.config import CHAT_ID, CART_IMAGE
 
 
 @userRouter.callback_query(F.data == "my_cart", StateFilter("*"))
 async def my_cart(call: CallbackQuery, state: FSMContext, api: ApiWrapper):
     await state.set_state(CartState.cart)
+    local_cart = (await state.get_data()).get("cart", [])
+    print("Local Cart:", local_cart)
 
+    # Replace user's local cart with user's api cart
+    # await state.update_data(cart=user_cart)
+
+    # Replace user's local cart with user's local cart
+    # await state.update_data(cart=local_cart)
+
+    # Replace user's api cart with user's local cart
+    await api.post_cart(call.from_user.id, local_cart)
+
+    # Get user's api cart
     user_cart = await api.get_user_cart(user_id=call.from_user.id)
-    await state.update_data(cart=user_cart)
-    await call.message.answer_photo(
-        photo=FSInputFile("yestabak/assets/cart.jpg"),
-        caption="<b>1) Выберите товар\n2) Внесите изменения</b>"
-        if len(user_cart)
-        else "Ваша корзина пуста ❌",
+
+    await call.message.edit_media(
+        media=InputMediaPhoto(
+            media=CART_IMAGE,
+            caption="<b>1) Выберите товар\n2) Внесите изменения</b>"
+            if len(user_cart)
+            else "Ваша корзина пуста ❌",
+        ),
         reply_markup=cart_kb(user_cart),
     )
 
@@ -34,17 +49,29 @@ async def my_cart(call: CallbackQuery, state: FSMContext, api: ApiWrapper):
 async def delete_cart_item(call: CallbackQuery, state: FSMContext):
     item_id = int(call.data.split("_")[-1])
     current_cart = (await state.get_data())["cart"]
-    updated_cart = list(filter(lambda item: item["id"] != item_id, current_cart))
+    updated_cart = list(filter(lambda item: item["item_id"] != item_id, current_cart))
     await state.update_data(cart=updated_cart)
     await call.message.edit_reply_markup(reply_markup=cart_kb(updated_cart))
 
 
 @userRouter.callback_query(F.data == "procedure_order")
 async def procedure_order(call: CallbackQuery, api: ApiWrapper, state: FSMContext):
-    addresses = (await api.get_user_if_exists(call.from_user.id)).addresses
+    user = await api.get_user_if_exists(call.from_user.id)
+    addresses = user.addresses
+
+    if not user.cart_items or len(user.cart_items) == 0:
+        await call.answer(
+            text="Корзина пуст! \nСначала добавьте товар в корзину!",
+            show_alert=True,
+        )
+        await my_cart(call, state, api)
+        return
+    
     if not len(addresses):
         await call.answer("Добавьте адреса в профиле для продолжения", show_alert=True)
         return await my_addresses(call, api, state)
+    
+
     await call.message.delete()
     await call.message.answer(
         "Выберите адрес из добавленных вами ниже:",
@@ -57,17 +84,19 @@ async def finish_order(
     call: CallbackQuery, state: FSMContext, api: ApiWrapper, bot: Bot
 ):
     address_id = int(call.data.split("_")[-1])
-    await state.clear()
     user = await api.get_user_if_exists(call.from_user.id)
     address = list(filter(lambda address: address.id == address_id, user.addresses))[0]
 
-    if not user.addresses or len(user.addresses) == 0:
-        await call.answer(text="Вы не добавляли адрес для доставки. \nПерейдите в профиль и добавьте адрес!", show_alert=True)
-        return
+    # if not user.addresses or len(user.addresses) == 0:
+    #     await call.answer(
+    #         text="Вы не добавляли адрес для доставки. \nПерейдите в профиль и добавьте адрес!",
+    #         show_alert=True,
+    #     )
+    #     return
 
     formatted_text = (
         f"Поступил заказ! \n"
-        + f"Заказчик: <a href=\"tg://openmessage?user_id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
+        + f"Заказчик: <a href=\"tg://user?id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
         + f"Номер телефона: {user.user.phone_number} \n"
         + f"Адрес: {address.data['address']} \n"
         + f"Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \n"
@@ -76,11 +105,18 @@ async def finish_order(
     for item in user.cart_items:
         formatted_text += f"\n ~ [{item.quantity} шт.] {item.name}"
 
-    await bot.send_message(CHAT_ID, formatted_text)
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text=f"Перейти к {call.from_user.full_name}",
+        url=f"tg://user?id={call.from_user.id}",
+    )
+
+    await bot.send_message(CHAT_ID, formatted_text, reply_markup=builder.as_markup())
 
     await api.post_cart(call.from_user.id, [])
     await call.answer(
         "Заказ оформлен ✅ \nС вами в скором времени свяжется наш сотрудник! 😎",
         show_alert=True,
     )
+    await state.clear()
     await start_handler(call, state, api)

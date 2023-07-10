@@ -16,7 +16,7 @@ def check_id_in_cart(
     id_to_check: int, items: List[SelectedItem]
 ) -> Tuple[bool, SelectedItem]:
     for item in items:
-        if item["id"] == id_to_check and item["quantity"]:
+        if item.get("id", item.get("item_id", None)) == id_to_check and item["quantity"]:
             return True, item
     return False, None
 
@@ -75,7 +75,7 @@ def items_kb(items, selected_items: List[SelectedItem]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     is_cart_filled = False
     for item in items:
-        item_id = item["id"]
+        item_id = item.get("id", item.get("item_id", None))
         check_result, item_from_cart = check_id_in_cart(item_id, selected_items)
 
         if not check_result:

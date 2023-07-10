@@ -1,7 +1,8 @@
 from aiogram import F
-from aiogram.types import CallbackQuery, InputMediaPhoto, URLInputFile, FSInputFile
+from aiogram.types import CallbackQuery, InputMediaPhoto, URLInputFile
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from yestabak.configs.config import ITEMS_IMAGE
 from yestabak.routes import userRouter
 from yestabak.utils import cart_dispatch
 from yestabak.keyboards import items_kb
@@ -14,16 +15,17 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
     current_cart = state_data["cart"]
     items = state_data["items"]
     current_item_info_id = state_data.get("current_item_info_id")
+    print("items:", items)
 
     for item in items:
         item_clicked = None
-        if item["id"] == int(item_id):
+        if item.get("id", item.get("item_id", None)) == int(item_id):
             item_clicked = item
             break
 
     for item in current_cart:
         item_in_cart = None
-        if item["id"] == int(item_id):
+        if item.get("id", item.get("item_id", None)) == int(item_id):
             item_in_cart = item
             break
 
@@ -63,7 +65,7 @@ async def handle_item_click(call: CallbackQuery, state: FSMContext):
     if (event_type == "decrease" or event_type == "delete") and not len(cart):
         await call.message.edit_media(
             InputMediaPhoto(
-                media=FSInputFile("yestabak/assets/items.jpg"),
+                media=ITEMS_IMAGE,
                 caption="<b>1. Выберите товар\n2. Добавьте в корзину</b>",
             ),
         )

@@ -1,9 +1,10 @@
-from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
+from aiogram.types import CallbackQuery, InputMediaPhoto, Message
 from aiogram import F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 from typing import Literal
 from yestabak.api_wrapper import ApiWrapper
+from yestabak.configs.config import ADDRESSES_IMAGE, PROFILE_IMAGE
 from yestabak.keyboards import (
     profile_kb,
     addresses_kb,
@@ -34,7 +35,7 @@ async def my_profile(call: CallbackQuery, api: ApiWrapper):
     user = await api.get_user_if_exists(call.from_user.id)
     await call.message.edit_media(
         InputMediaPhoto(
-            media=FSInputFile("yestabak/assets/profile.jpg"),
+            media=PROFILE_IMAGE,
             caption=format_profile_info(
                 user.user.first_name, user.user.last_name, step="menu"
             ),
@@ -53,7 +54,7 @@ async def my_addresses(
         try:
             await event.message.edit_media(
                 media=InputMediaPhoto(
-                    media=FSInputFile("yestabak/assets/addresses.jpg"),
+                    media=ADDRESSES_IMAGE,
                     caption=format_profile_info(
                         user.user.first_name,
                         user.user.last_name,
@@ -65,7 +66,7 @@ async def my_addresses(
         except:
             await event.message.delete()
             await event.message.answer_photo(
-                FSInputFile("yestabak/assets/profile.jpg"),
+                PROFILE_IMAGE,
                 caption=format_profile_info(
                     user.user.first_name,
                     user.user.last_name,
@@ -75,7 +76,7 @@ async def my_addresses(
             )
     else:
         await event.answer_photo(
-            FSInputFile("yestabak/assets/profile.jpg"),
+            PROFILE_IMAGE,
             caption=format_profile_info(
                 user.user.first_name, user.user.last_name, step="menu"
             ),
@@ -117,7 +118,7 @@ async def address_edit_manager(call: CallbackQuery, state: FSMContext, api: ApiW
             'Пришлите название адреса (например, "Мой дом") \n\nНикто кроме вас не будет видеть эту информацию!',
             reply_markup=cancel_address_kb(),
         )
-        await state.clear()
+        # await state.clear()
         await state.set_state(AddressState.get_name)
         await state.update_data(message_id=msg.message_id)
 

@@ -3,16 +3,22 @@ from aiogram import F
 from aiogram.filters import StateFilter
 from aiogram.types import (
     Message,
-    FSInputFile,
     CallbackQuery,
     InputMediaPhoto,
     ReplyKeyboardRemove,
 )
 from aiogram.fsm.context import FSMContext
 from yestabak.api_wrapper import ApiWrapper
+from yestabak.configs.config import MENU_IMAGE
 from yestabak.routes.user.router import userRouter
 from yestabak.keyboards import start_menu_kb, contact_kb
 from yestabak.states import RegState
+
+
+# To handle photos and send their "file_id" attribute (to reuse without downloading again and again)
+# @userRouter.message(F.photo)
+# async def photo_handler(message: Message):
+#     await message.reply(message.photo[-1].file_id)
 
 
 @userRouter.message(F.text == "/start", StateFilter("*"))
@@ -20,7 +26,7 @@ from yestabak.states import RegState
 async def start_handler(
     message: Union[Message, CallbackQuery], state: FSMContext, api: ApiWrapper
 ):
-    await state.clear()
+    # await state.clear()
     if isinstance(message, CallbackQuery):
         message = message.message
     else:
@@ -37,14 +43,14 @@ async def start_handler(
     if message.photo:
         await message.edit_media(
             InputMediaPhoto(
-                media=FSInputFile("yestabak/assets/menu.jpg"),
+                media=MENU_IMAGE,
                 caption="<b>Добро пожаловать!</b>",
             ),
             reply_markup=start_menu_kb(),
         )
     else:
         await message.answer_photo(
-            photo=FSInputFile("yestabak/assets/menu.jpg"),
+            photo=MENU_IMAGE,
             caption="<b>Добро пожаловать!</b>",
             reply_markup=start_menu_kb(),
         )

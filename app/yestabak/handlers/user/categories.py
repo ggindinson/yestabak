@@ -1,8 +1,9 @@
 from aiogram import F
 from aiogram.filters import StateFilter
-from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
+from aiogram.types import CallbackQuery, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
 from yestabak.api_wrapper import ApiWrapper
+from yestabak.configs.config import CATEGORIES_IMAGE, ITEMS_IMAGE
 from yestabak.routes.user.router import userRouter
 from yestabak.keyboards import categories_kb, items_kb
 from yestabak.states import CategoryState
@@ -16,7 +17,7 @@ async def categories_menu(call: CallbackQuery, state: FSMContext, api: ApiWrappe
 
     await call.message.edit_media(
         media=InputMediaPhoto(
-            media=FSInputFile("yestabak/assets/profile.jpg"),
+            media=CATEGORIES_IMAGE,
             caption="<b>Выберите категорию</b>",
         ),
         reply_markup=categories_kb(categories),
@@ -34,7 +35,7 @@ async def single_category(call: CallbackQuery, state: FSMContext, api: ApiWrappe
 
     await call.message.edit_media(
         InputMediaPhoto(
-            media=FSInputFile("yestabak/assets/items.jpg"),
+            media=ITEMS_IMAGE,
             caption="<b>1. Выберите товар\n2. Добавьте в корзину</b>",
         ),
         reply_markup=items_kb(category_items, cart),
