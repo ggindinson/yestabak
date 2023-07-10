@@ -96,7 +96,8 @@ async def finish_order(
 
     formatted_text = (
         f"Поступил заказ! \n"
-        + f"Заказчик: <a href=\"tg://user?id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
+        + f"Заказчик (реальное фио): <a href=\"tg://user?id={call.from_user.id}\">{user.user.first_name} {user.user.last_name if user.user.last_name else ''}</a> \n"
+        + f"Телеграм: <a href=\"tg://user?id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
         + f"Номер телефона: {user.user.phone_number} \n"
         + f"Адрес: {address.data['address']} \n"
         + f"Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \n"
