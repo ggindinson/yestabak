@@ -1,4 +1,5 @@
 from datetime import datetime
+from aiogram import exceptions
 from aiogram import F, Bot
 from aiogram.types import CallbackQuery, InputMediaPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -112,12 +113,37 @@ async def finish_order(
         url=f"tg://user?id={call.from_user.id}",
     )
 
-    await bot.send_message(CHAT_ID, formatted_text, reply_markup=builder.as_markup())
+    try:
+        await bot.send_message(CHAT_ID, formatted_text, reply_markup=builder.as_markup())
+        await api.post_cart(call.from_user.id, [])
+        await call.answer(
+            "Заказ оформлен ✅ \nС вами в скором времени свяжется наш сотрудник! 😎",
+            show_alert=True,
+        )
+        await state.clear()
+        await start_handler(call, state, api)
+    except exceptions.TelegramBadRequest as err:
+        if "BUTTON_USER_PRIVACY_RESTRICTED" in err.message:
+            formatted_text = (
+                f"Поступил заказ! \n"
+                + f"Заказчик (реальное фио): <a href=\"tg://user?id={call.from_user.id}\">{user.user.first_name} {user.user.last_name if user.user.last_name else ''}</a> \n\n"
+                + f"Телеграм: <a href=\"tg://user?id={call.from_user.id}\">{call.from_user.first_name} {call.from_user.last_name if call.from_user.last_name else ''}</a> \n"
+                + f"<b><i>Телеграм пользователя приватный, скорее всего через телграм вы с ним никак не свяжетесь!</i></b> \n\n"
+                + f"Номер телефона: {user.user.phone_number} \n"
+                + f"Адрес: {address.data['address']} \n"
+                + f"Дата и время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \n"
+                + f"Товары: "
+            )
+            for item in user.cart_items:
+                formatted_text += f"\n ~ [{item.quantity} шт.] {item.name}"
+        
+            await bot.send_message(CHAT_ID, formatted_text)
+        
+            await api.post_cart(call.from_user.id, [])
+            await call.answer(
+                "Заказ оформлен ✅ \n⚠️ НО! Пункт «Пересылка сообщений» в настройках вашего аккаунта НЕ позволяет нам связаться с вами через телеграм. \n😎 Всё же, мы сделаем всё возможное, чтобы связаться с вами!",
+                show_alert=True,
+            )
+            await state.clear()
+            await start_handler(call, state, api)
 
-    await api.post_cart(call.from_user.id, [])
-    await call.answer(
-        "Заказ оформлен ✅ \nС вами в скором времени свяжется наш сотрудник! 😎",
-        show_alert=True,
-    )
-    await state.clear()
-    await start_handler(call, state, api)
