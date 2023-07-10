@@ -11,12 +11,13 @@ from yestabak.states import CategoryState
 
 @userRouter.callback_query(F.data == "all_categories", StateFilter("*"))
 async def categories_menu(call: CallbackQuery, state: FSMContext, api: ApiWrapper):
-    await state.clear()
-
+    # await state.clear()
+    print("CATEGORIES_IMAGE:", CATEGORIES_IMAGE)
     categories = await api.get_categories()
 
     await call.message.edit_media(
         media=InputMediaPhoto(
+            type="photo",
             media=CATEGORIES_IMAGE,
             caption="<b>Выберите категорию</b>",
         ),

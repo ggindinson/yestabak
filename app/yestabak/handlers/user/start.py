@@ -5,7 +5,6 @@ from aiogram.types import (
     Message,
     CallbackQuery,
     InputMediaPhoto,
-    ReplyKeyboardRemove,
 )
 from aiogram.fsm.context import FSMContext
 from yestabak.api_wrapper import ApiWrapper
@@ -16,9 +15,9 @@ from yestabak.states import RegState
 
 
 # To handle photos and send their "file_id" attribute (to reuse without downloading again and again)
-# @userRouter.message(F.photo)
-# async def photo_handler(message: Message):
-#     await message.reply(message.photo[-1].file_id)
+@userRouter.message(F.photo)
+async def photo_handler(message: Message):
+    await message.reply(message.photo[-1].file_id)
 
 
 @userRouter.message(F.text == "/start", StateFilter("*"))
