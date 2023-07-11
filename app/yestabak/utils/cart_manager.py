@@ -10,13 +10,13 @@ def check_item_in_list(item_id, items_list: List[Dict[int, int]]):
 
 def decrease_item(item_id, items_list: List[Dict[int, int]]):
     if not check_item_in_list(item_id, items_list):
-        cart = list(filter(lambda item: item["item_id"] != item_id, items_list))
+        cart = list(filter(lambda item: item.get('id', item.get('item_id', None)) != item_id, items_list))
         return cart
 
     for item in items_list:
-        if item["item_id"] == item_id:
+        if item.get('id', item.get('item_id', None)) == item_id:
             if item["quantity"] == 1:
-                return list(filter(lambda item: item["item_id"] != item_id, items_list))
+                return list(filter(lambda item: item.get('id', item.get('item_id', None)) != item_id, items_list))
             item["quantity"] -= 1
             return items_list
 

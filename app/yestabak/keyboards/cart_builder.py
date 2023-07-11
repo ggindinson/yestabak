@@ -4,6 +4,7 @@ from aiogram.types import InlineKeyboardMarkup
 
 def cart_kb(items) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
+    print("items:", items)
     for item in items:
         name = item["name"]
         builder.button(
@@ -12,7 +13,7 @@ def cart_kb(items) -> InlineKeyboardMarkup:
         )
         builder.button(
             text=f"🗑️ Убрать {name} из корзины",
-            callback_data=f"delete_cartitem_{item['id']}",
+            callback_data=f"delete_cartitem_{item.get('id', item.get('item_id', None))}",
         )
     builder.button(text="🎯 Оформить заказ", callback_data="procedure_order") if len(
         items

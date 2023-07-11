@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 from aiogram import exceptions
 from aiogram import F, Bot
@@ -28,7 +29,8 @@ async def my_cart(call: CallbackQuery, state: FSMContext, api: ApiWrapper):
     # await state.update_data(cart=local_cart)
 
     # Replace user's api cart with user's local cart
-    await api.post_cart(call.from_user.id, local_cart)
+    resp = await api.post_cart(call.from_user.id, local_cart)
+    print("response:", resp)
 
     # Get user's api cart
     user_cart = await api.get_user_cart(user_id=call.from_user.id)
@@ -65,7 +67,8 @@ async def procedure_order(call: CallbackQuery, api: ApiWrapper, state: FSMContex
             text="Корзина пуст! \nСначала добавьте товар в корзину!",
             show_alert=True,
         )
-        await my_cart(call, state, api)
+        await call.message.delete()
+        # await my_cart(call, state, api)
         return
     
     if not len(addresses):
@@ -86,14 +89,21 @@ async def finish_order(
 ):
     address_id = int(call.data.split("_")[-1])
     user = await api.get_user_if_exists(call.from_user.id)
-    address = list(filter(lambda address: address.id == address_id, user.addresses))[0]
 
-    # if not user.addresses or len(user.addresses) == 0:
-    #     await call.answer(
-    #         text="Вы не добавляли адрес для доставки. \nПерейдите в профиль и добавьте адрес!",
-    #         show_alert=True,
-    #     )
-    #     return
+    if not user.cart_items or len(user.cart_items) == 0:
+        await call.answer(
+            text="Корзина пуст! \nСначала добавьте товар в корзину!",
+            show_alert=True,
+        )
+        await call.message.delete()
+        # await my_cart(call, state, api)
+        return
+    
+    if not len(user.addresses):
+        await call.answer("Добавьте адреса в профиле для продолжения", show_alert=True)
+        return await my_addresses(call, api, state)
+    
+    address = list(filter(lambda address: address.id == address_id, user.addresses))[0]
 
     formatted_text = (
         f"✅ Поступил заказ! \n"

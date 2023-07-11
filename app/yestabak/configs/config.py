@@ -6,7 +6,7 @@ config.read("yestabak/configs/config.ini")
 
 bot_config = config["BOT_CONFIG"]
 BOT_TOKEN = bot_config.get("BOT_TOKEN")
-CHAT_ID = -629210889
+CHAT_ID = -1001816694065
 
 CART_IMAGE = "AgACAgIAAxkBAAIGxGSsC6eTGAwuzq_aPSFD7Xph0Q54AALKyTEbHn9hSdmOa9Q7F3sAAQEAAwIAA3gAAy8E"
 CATEGORIES_IMAGE = "AgACAgIAAxkBAAIHZGSsXNlStVdQyfd7tEdp7WJmq-hpAALyyTEbHn9hSaW3aL_SmbgVAQADAgADeAADLwQ"

@@ -25,15 +25,17 @@ class TransferCartDataMiddleware(BaseMiddleware):
             "CartState:cart",
         ]:
             return await handler(call, data)
+        
         cart = (await state.get_data()).get("cart", [])
-        logger.info(f"Local cart: {cart}")
 
-        # for row in cart:
-        #     try:
-        #         row["item_id"] = row.pop("id")
-        #     except Exception as err:
-        #         print("Error in cart middleware:", err)
-        #         break
+        for row in cart:
+            try:
+                row["item_id"] = row.pop("id")
+            except Exception as err:
+                print("Error in cart middleware:", err)
+                break
+            
+        logger.info(f"Local cart: {cart}")
 
         await api.post_cart(user_id=call.from_user.id, cart=cart)
         return await handler(call, data)
