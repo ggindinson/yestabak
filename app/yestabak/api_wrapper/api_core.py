@@ -2,7 +2,7 @@ from typing import Dict, List, Literal
 from aiohttp import ClientSession
 
 from yestabak.utils import import_items_from_xlsx
-from .api_classes import Item, UserDataResponse, CartItem
+from .api_classes import Item, UserDataResponse, CartItem, ImportedItem
 from dacite import from_dict
 
 
@@ -104,9 +104,11 @@ class ApiWrapper:
         )
 
     async def import_items_from_excel(self, file_path: str):
-        data = import_items_from_xlsx(file_path=file_path)
+        data: List[ImportedItem] = import_items_from_xlsx(file_path=file_path)
+        data_dict = list(map(lambda item: item.dict(), data))
+        print("Data:", data_dict)
         response = await self.__request(
-            "POST", self.BASE_URL + f"/items/import", data=data
+            "POST", self.BASE_URL + f"/items/import", data=data_dict
         )
         return response
 
