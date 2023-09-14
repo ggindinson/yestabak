@@ -10,7 +10,7 @@ def import_items_from_xlsx(file_path: str):
     data = {}
     for wb_sheet in wb_sheets:
         data[wb_sheet.title] = [
-            ImportedItem(name=str(item[0]), price=float(item[1])) for item in wb_sheet.values
+            {"name": str(item[0]), "price": float(item[1])} for item in wb_sheet.values
         ]
 
     return data

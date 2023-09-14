@@ -104,11 +104,10 @@ class ApiWrapper:
         )
 
     async def import_items_from_excel(self, file_path: str):
-        data: List[ImportedItem] = import_items_from_xlsx(file_path=file_path)
-        data_dict = list(map(lambda item: item.dict(), data))
-        print("Data:", data_dict)
+        data: List[Dict] = import_items_from_xlsx(file_path=file_path)
+        print("Imported data:", data)
         response = await self.__request(
-            "POST", self.BASE_URL + f"/items/import", data=data_dict
+            "POST", self.BASE_URL + f"/items/import", data=data
         )
         return response
 
