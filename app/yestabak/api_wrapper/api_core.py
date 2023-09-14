@@ -1,7 +1,7 @@
 from typing import Dict, List, Literal
 from aiohttp import ClientSession
 
-from app.yestabak.utils import import_items_from_xlsx
+from yestabak.utils import import_items_from_xlsx
 from .api_classes import Item, UserDataResponse, CartItem
 from dacite import from_dict
 
