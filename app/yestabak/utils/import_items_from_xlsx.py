@@ -1,6 +1,6 @@
 from openpyxl.cell import Cell
 from openpyxl import load_workbook
-from api_wrapper.api_classes import ImportedItem
+from yestabak.api_wrapper.api_classes import ImportedItem
 import pprint
 
 
