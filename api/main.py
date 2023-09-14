@@ -639,15 +639,18 @@ def import_items_v1():
     keys = data.keys()
     for key in keys:
         is_succeed, category = get_category_by_name(Session(engine), name=key)
-        for item in data[key]:
-            is_created, result = create_item(
-                Session(engine),
-                category_id=category.id,
-                name=item.get("name"),
-                description="Описание временно недоступно",
-                price=item.get("price"),
-                photo="https://creditportal.by/images/tools/no-image_s.jpg",
-            )
+        if is_succeed:
+            for item in data[key]:
+                is_created, result = create_item(
+                    Session(engine),
+                    category_id=category.id,
+                    name=item.get("name"),
+                    description="Описание временно недоступно",
+                    price=item.get("price"),
+                    photo="https://creditportal.by/images/tools/no-image_s.jpg",
+                )
+        else:
+            print("Couldn't find category")
 
     return jsonify({"ok": True, "data": {"imported": "yes"}}), 200
 
