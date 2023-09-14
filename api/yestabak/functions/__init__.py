@@ -13,7 +13,8 @@ from yestabak.functions.user.update_user import update_user
 
 from yestabak.functions.category.create_category import create_category
 from yestabak.functions.category.delete_category import delete_category
-from yestabak.functions.category.get_category import get_category
+from yestabak.functions.category.get_category_by_id import get_category_by_id
+from yestabak.functions.category.get_category_by_name import get_category_by_name
 from yestabak.functions.category.get_categories import get_categories
 from yestabak.functions.category.update_category import update_category
 

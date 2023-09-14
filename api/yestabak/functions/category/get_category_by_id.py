@@ -3,7 +3,7 @@ from yestabak.models import Category
 from typing import Tuple, Union
 
 
-def get_category(
+def get_category_by_id(
     session: Session, id: int
 ) -> Tuple[Union[bool, None], Union[Category, str]]:
     try:

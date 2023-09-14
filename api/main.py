@@ -22,7 +22,8 @@ from yestabak.functions import (
     update_item,
     delete_item,
     # Category
-    get_category,
+    get_category_by_id,
+    get_category_by_name,
     get_categories,
     create_category,
     update_category,
@@ -165,7 +166,13 @@ def get_user_v1(telegram_id: int):
                     "data": {
                         "user": model_to_dict(result),
                         "addresses": list(
-                            map(lambda address: {"id": address.id,"data": address.data}, result.addresses),
+                            map(
+                                lambda address: {
+                                    "id": address.id,
+                                    "data": address.data,
+                                },
+                                result.addresses,
+                            ),
                         ),
                         "cart_items": cart_items,
                     },
@@ -626,6 +633,25 @@ def delete_item_v1(item_id: int):
     return jsonify({"ok": True, "data": {"item_id": result, "deleted": True}}), 200
 
 
+@app.post("/api/v1/items/import")
+def import_items_v1():
+    data: dict = request.json if request.is_json else request.args
+    keys = data.keys()
+    for key in keys:
+        is_succeed, category = get_category_by_name(Session(engine), name=key)
+        for item in data[key]:
+            is_created, result = create_item(
+                Session(engine),
+                category_id=category.id,
+                name=item.get("name"),
+                description="Описание временно недоступно",
+                price=item.get("price"),
+                photo="https://creditportal.by/images/tools/no-image_s.jpg",
+            )
+
+    return jsonify({"ok": True, "data": {"imported": "yes"}}), 200
+
+
 # ITEM - END
 
 
@@ -686,7 +712,7 @@ def get_categories_v1():
 @app.get("/api/v1/categories/<int:category_id>")
 def get_category_v1(category_id: int):
     try:
-        is_succeed, result = get_category(session=Session(engine), id=category_id)
+        is_succeed, result = get_category_by_id(session=Session(engine), id=category_id)
 
         if is_succeed is False:
             return jsonify({"ok": False, "message": f"unknown error: {result}"}), 500
@@ -911,6 +937,6 @@ def get_all_cart_items_v1(telegram_id: int):
 # CART- END
 
 
-if __name__ == "__main__":
-    print(f"Running at http://127.0.0.1:8000")
-    app.run(host=HOST, port=PORT)
+# if __name__ == "__main__":
+#     print(f"Running at http://127.0.0.1:8000")
+#     app.run(host=HOST, port=PORT)
