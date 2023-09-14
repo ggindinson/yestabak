@@ -17,6 +17,9 @@ def categories_kb(categories: list, is_admin_menu=False) -> InlineKeyboardMarkup
             )
         )
     builder.row(
+        InlineKeyboardButton(text="📩 Импортировать из Excel", callback_data="import_from_excel")
+    )
+    builder.row(
         InlineKeyboardButton(text="⬅️ Вернуться в меню", callback_data="main_menu")
     )
     return builder.as_markup()

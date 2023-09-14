@@ -1,5 +1,7 @@
 from typing import Dict, List, Literal
 from aiohttp import ClientSession
+
+from app.yestabak.utils import import_items_from_xlsx
 from .api_classes import Item, UserDataResponse, CartItem
 from dacite import from_dict
 
@@ -101,6 +103,13 @@ class ApiWrapper:
             "PATCH", self.BASE_URL + f"/items/{item_id}", data={update_type: data}
         )
 
+    async def import_items_from_excel(self, file_path: str):
+        data = import_items_from_xlsx(file_path=file_path)
+        response = await self.__request(
+            "POST", self.BASE_URL + f"/items/import", data=data
+        )
+        return response
+
     # Cart
     async def get_user_cart(self, user_id: int) -> List[CartItem]:
         response = await self.__request(
@@ -162,7 +171,9 @@ class ApiWrapper:
 
             # print("Payload:", payload)
 
-            async with session.request(method, url, params=params, json=data) as response:
+            async with session.request(
+                method, url, params=params, json=data
+            ) as response:
                 json_data = await response.json()
                 print(url, data, json_data)
                 if not json_data.get("ok", True):

@@ -9,17 +9,18 @@ from yestabak.configs import BOT_TOKEN
 from yestabak.utils import render_text
 
 
+# Initialize Bot
+bot = Bot(BOT_TOKEN, parse_mode="HTML")
+
+# Initialize Dispatcher
+dp = Dispatcher(storage=ms())
+
+
 # main function to run
 async def main():
     from yestabak import handlers
 
     try:
-        # Initialize Bot
-        bot = Bot(BOT_TOKEN, parse_mode="HTML")
-
-        # Initialize Dispatcher
-        dp = Dispatcher(storage=ms())
-
         # Configure logging
         logging.basicConfig(
             level=logging.INFO,

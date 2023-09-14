@@ -52,3 +52,9 @@ class UserDataResponse:
     addresses: List[Address]
     user: User
     cart_items: List[CartItem]
+
+
+@dataclass
+class ImportedItem:
+    name: str
+    price: float

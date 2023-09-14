@@ -39,7 +39,7 @@ def admin_items_kb(items, category_id: int):
 
 def admin_back_kb():
     builder = InlineKeyboardBuilder()
-    builder.button(text="🔙 К категориям", callback_data="admin")
+    builder.button(text="🔙 Вернуться в админ панель", callback_data="admin")
     return builder.as_markup()
 
 

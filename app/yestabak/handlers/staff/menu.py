@@ -13,6 +13,8 @@ from yestabak.routes import staffRouter
 from yestabak.api_wrapper import ApiWrapper
 from yestabak.states import AdminState
 from yestabak.keyboards import categories_kb
+from main import bot
+import os
 
 
 @staffRouter.message(F.text == "/admin", StateFilter("*"))
@@ -217,11 +219,36 @@ async def manage_admin_role(message: Message, api: ApiWrapper):
 
     if message.from_user.id == user_id:
         await message.delete()
-        await message.answer("Вы не можете снять права администратора с себя ❌", reply_markup=admin_back_kb())
+        await message.answer(
+            "Вы не можете снять права администратора с себя ❌",
+            reply_markup=admin_back_kb(),
+        )
         return
-    
+
     await api.update_user_role(
         user_id=user_id, role="admin" if "+admin" in message.text else "user"
     )
     await message.delete()
     await message.answer("Админка обновлена ✅", reply_markup=admin_back_kb())
+
+
+@staffRouter.callback_query(F.data == "import_from_excel")
+async def import_from_excel(call: CallbackQuery, state: FSMContext):
+    await call.message.edit_text(
+        "Правила: \n<b>1. Название каждый таблицы должно совпадать с названием категории!</b> \n\n<i>Отправьте ваш Excel файл:</i>",
+        reply_markup=admin_cancel_kb(),
+    )
+    await state.set_state(AdminState.import_from_excel)
+
+
+@staffRouter.message(
+    F.content_type.in_({"document"}), StateFilter(AdminState.import_from_excel)
+)
+async def import_data_from_excel(message: Message, api: ApiWrapper, state: FSMContext):
+    file_id = message.document.file_id
+    file = await bot.get_file(file_id=file_id)
+    await bot.download_file(file.file_path, "vapes.xlsx")
+    await api.import_items_from_excel(file_path="vapes.xlsx")
+    await message.reply("Спасибо! \nТовары были импортированы!")
+    await os.remove("vapes.xlsx")
+    await state.clear()

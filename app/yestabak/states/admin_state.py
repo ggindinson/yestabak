@@ -8,3 +8,4 @@ class AdminState(StatesGroup):
     get_item_photo = State()
     get_item_description = State()
     get_item_price = State()
+    import_from_excel = State()
