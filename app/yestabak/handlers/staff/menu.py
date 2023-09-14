@@ -250,5 +250,5 @@ async def import_data_from_excel(message: Message, api: ApiWrapper, state: FSMCo
     await bot.download_file(file.file_path, "vapes.xlsx")
     await api.import_items_from_excel(file_path="vapes.xlsx")
     await message.reply("Спасибо! \nТовары были импортированы!")
-    await os.remove("vapes.xlsx")
+    os.remove("vapes.xlsx")
     await state.clear()
